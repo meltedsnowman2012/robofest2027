@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -1642,16 +1640,58 @@ async function migrateLegacyRobofestData(){
 let botChannelEnsureInFlight=false;
 async function ensureBotChannelExists(){
   if(botChannelEnsureInFlight)return;
-  const catExists=categories.some(c=>c.id===BOT_CAT_ID),chanExists=channels.some(c=>c.id===BOT_CHANNEL_ID);
+  const catExists=categories.some(c=>c.id===BOT_CAT_ID);
+  const chanExists=channels.some(c=>c.id===BOT_CHANNEL_ID);
   if(catExists&&chanExists)return;
   if(!myDoc?.isAdmin)return;
   botChannelEnsureInFlight=true;
   try{
     if(!catExists)await setDoc(doc(db,'categories',BOT_CAT_ID),{name:activeTeam===TEAM_CCE?'🤖 CCE NEXTBOT':'🤖 BOT',position:categories.length,team:activeTeam},{merge:true});
-    if(!chanExists)await setDoc(doc(db,'channels',BOT_CHANNEL_ID),{categoryId:BOT_CAT_ID,name:'봇-알림',position:0,allowedRoles:[],team:activeTeam},{merge:true});
+    if(!chanExists)await setDoc(doc(db,'channels',BOT_CHANNEL_ID),{categoryId:BOT_CAT_ID,name:'봇-알림',position:0,allowedRoles:[],team:activeTeam,topic:'',locked:false,archived:false},{merge:true});
   }catch(e){console.error('bot channel ensure error',e);}
   botChannelEnsureInFlight=false;
 }
+
+let collapsedCats = {};
+function renderSidebarChannels(){
+  const box=$('sbChannels');
+  if(!box)return;
+  const visibleCats=[...categories].filter(cat=>teamResourceMatches(cat)).sort((a,b)=>(a.position||0)-(b.position||0));
+  if(!visibleCats.length){
+    box.innerHTML='<div class="empty" style="padding:14px 10px;">현재 워크스페이스에 채팅방이 없습니다.</div>';
+    const addCat=$('addCatBtn'); if(addCat)addCat.classList.toggle('hidden',!myDoc?.isAdmin);
+    return;
+  }
+  box.innerHTML=visibleCats.map(cat=>{
+    const chans=channels.filter(c=>c.categoryId===cat.id&&teamResourceMatches(c)&&canSeeChannel(c)&&(myDoc?.isAdmin||!c.archived)).sort((a,b)=>(a.position||0)-(b.position||0));
+    const collapsed=!!collapsedCats[cat.id];
+    return `<div class="sb-cat" data-cat="${escapeHtml(cat.id)}">
+      <div class="sb-cat-head ${collapsed?'collapsed':''}" data-toggle="${escapeHtml(cat.id)}">
+        <span class="car">▾</span><span>${escapeHtml(cat.name)}</span>
+        ${myDoc?.isAdmin&&!cat.__virtual?`<span class="sb-cat-admin-del" data-delcat="${escapeHtml(cat.id)}">삭제</span>`:''}
+      </div>
+      <div class="sb-chan-list ${collapsed?'collapsed':''}">
+        ${chans.map(ch=>`<div class="sb-chan ${ch.id===currentChannelId?'active':''}" data-chan="${escapeHtml(ch.id)}" data-catname="${escapeHtml(cat.name)}">
+            <span class="hash">#</span><span>${escapeHtml(ch.name)}</span>
+            <span class="unread-dot ${channelHasUnread(ch)?'on':''}"></span>
+            ${myDoc?.isAdmin&&!ch.__virtual?`<span class="chan-perm" data-permchan="${escapeHtml(ch.id)}" title="접근 권한">⚙</span><span class="del-x" data-delchan="${escapeHtml(ch.id)}">✕</span>`:''}
+          </div>`).join('')}
+        ${myDoc?.isAdmin&&!cat.__virtual?`<div class="sb-add-chan" data-addchan="${escapeHtml(cat.id)}">+ 채널 추가</div>`:''}
+        ${!chans.length?'<div class="empty" style="padding:5px 16px;font-size:11px;">표시할 채널이 없습니다.</div>':''}
+      </div>
+    </div>`;
+  }).join('');
+  const addCatBtn=$('addCatBtn'); if(addCatBtn)addCatBtn.classList.toggle('hidden',!myDoc?.isAdmin);
+  box.querySelectorAll('[data-toggle]').forEach(el=>el.onclick=()=>{const id=el.getAttribute('data-toggle');collapsedCats[id]=!collapsedCats[id];renderSidebarChannels();});
+  box.querySelectorAll('[data-chan]').forEach(el=>el.onclick=()=>{const cid=el.getAttribute('data-chan');const ch=channels.find(c=>c.id===cid);if(!ch||!canSeeChannel(ch))return;openChannel(cid,ch.name,categories.find(c=>c.id===ch.categoryId)?.name||'');closeDrawer();});
+  box.querySelectorAll('[data-delchan]').forEach(el=>el.onclick=async e=>{e.stopPropagation();const cid=el.getAttribute('data-delchan');const chObj=channels.find(c=>c.id===cid);if(!chObj||!teamResourceMatches(chObj)||chObj.__virtual)return;if(!confirm(`#${chObj.name} 채널을 삭제할까요?`))return;await deleteDoc(doc(db,'channels',cid));if(cid!==BOT_CHANNEL_ID)sendBotMessage(BOT_CHANNEL_ID,`🗑 ${myDoc.nickname}님이 #${chObj.name} 채널을 삭제했어요.`);});
+  box.querySelectorAll('[data-permchan]').forEach(el=>el.onclick=e=>{e.stopPropagation();openChannelPermModal(el.getAttribute('data-permchan'));});
+  box.querySelectorAll('[data-delcat]').forEach(el=>el.onclick=async e=>{e.stopPropagation();const cid=el.getAttribute('data-delcat');const catObj=categories.find(c=>c.id===cid);if(!catObj||!teamResourceMatches(catObj)||catObj.__virtual)return;if(!confirm(`"${catObj.name}"와 하위 채널을 모두 삭제할까요?`))return;for(const c of channels.filter(x=>x.categoryId===cid&&teamResourceMatches(x)))await deleteDoc(doc(db,'channels',c.id));await deleteDoc(doc(db,'categories',cid));if(cid!==BOT_CAT_ID)sendBotMessage(BOT_CHANNEL_ID,`🗑 ${myDoc.nickname}님이 "${catObj.name}" 카테고리를 삭제했어요.`);});
+  box.querySelectorAll('[data-addchan]').forEach(el=>el.onclick=async e=>{e.stopPropagation();const catId=el.getAttribute('data-addchan');const catObj=categories.find(c=>c.id===catId);if(!catObj||!teamResourceMatches(catObj))return;const name=prompt('새 채널 이름을 입력하세요');if(!name?.trim())return;const count=channels.filter(c=>c.categoryId===catId&&teamResourceMatches(c)).length;await addDoc(collection(db,'channels'),{categoryId:catId,name:name.trim(),position:count,allowedRoles:[],team:activeTeam,topic:'',locked:false,archived:false});sendBotMessage(BOT_CHANNEL_ID,`📌 ${myDoc.nickname}님이 #${name.trim()} 채널을 만들었어요. (${catObj.name})`);});
+}
+$('addCatBtn').onclick=async()=>{if(!myDoc?.isAdmin)return;const name=prompt('새 카테고리 이름을 입력하세요 (예: 📁 새 카테고리)');if(!name?.trim())return;await addDoc(collection(db,'categories'),{name:name.trim(),position:categories.length,team:activeTeam});sendBotMessage(BOT_CHANNEL_ID,`📁 ${myDoc.nickname}님이 "${name.trim()}" 카테고리를 새로 만들었어요.`);};
+
+/* ---------------- Channel access permissions ---------------- */
 function canSeeChannel(ch){
   if(!ch||!teamResourceMatches(ch))return false;
   if(myDoc?.isAdmin&&(isTeamLeadAccount()||userTeam(myDoc)===activeTeam))return true;
