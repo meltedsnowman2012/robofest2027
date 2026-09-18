@@ -1559,27 +1559,57 @@ $('memberBtn').onclick=()=>{
 $('memberScrim').onclick=()=>{ $('memberPanel').classList.remove('popup'); $('memberScrim').classList.remove('show'); };
 
 /* ---------------- Structure (categories/channels) ---------------- */
+function teamStructureFallback(team=activeTeam){
+  const src=team===TEAM_CCE?CCE_STRUCTURE:DEFAULT_STRUCTURE;
+  return src.map(cat=>({
+    id:cat.id,name:cat.name,position:cat.position,team,
+    __virtual:true
+  }));
+}
+function teamChannelFallback(team=activeTeam){
+  const src=team===TEAM_CCE?CCE_STRUCTURE:DEFAULT_STRUCTURE;
+  return src.flatMap(cat=>cat.channels.map((c,i)=>({
+    id:c.id,categoryId:cat.id,name:c.name,position:i,allowedRoles:[],team,topic:'',locked:false,archived:false,__virtual:true
+  })));
+}
+function mergeWithTeamFallback(dbItems, fallbackItems){
+  if(dbItems.length)return dbItems;
+  return fallbackItems;
+}
 function listenStructure(){
   if(categoriesUnsub)categoriesUnsub();if(channelsUnsub)channelsUnsub();
+  // CCE는 기존 문서가 없을 수 있으므로 가상 기본 구조를 먼저 사용하고,
+  // 실제 Firestore 문서가 있으면 그 문서로 교체합니다. ROBOFEST는 team 없는 기존 데이터도 호환합니다.
   const catQuery=activeTeam===TEAM_CCE
     ?query(collection(db,'categories'),where('team','==',TEAM_CCE))
     :query(collection(db,'categories'),orderBy('position'));
   categoriesUnsub=onSnapshot(catQuery,snap=>{
-    categories=snap.docs.map(d=>({id:d.id,...d.data()})).filter(c=>teamResourceMatches(c));
-    if(categories.length===0&&!structureSeeded){structureSeeded=true;seedDefaultStructure(activeTeam);}
-    else if(categories.length>0)ensureBotChannelExists();
+    const dbCats=snap.docs.map(d=>({id:d.id,...d.data()})).filter(c=>teamResourceMatches(c));
+    categories=mergeWithTeamFallback(dbCats,teamStructureFallback(activeTeam));
+    structureSeeded=categories.some(c=>!c.__virtual);
+    ensureBotChannelExists();
     renderSidebarChannels();
-  },e=>console.warn('categories listener error',e));
+  },e=>{
+    console.warn('categories listener error',e);
+    categories=teamStructureFallback(activeTeam);
+    renderSidebarChannels();
+  });
 
   const chQuery=activeTeam===TEAM_CCE
     ?query(collection(db,'channels'),where('team','==',TEAM_CCE))
     :query(collection(db,'channels'));
   channelsUnsub=onSnapshot(chQuery,snap=>{
-    channels=snap.docs.map(d=>({id:d.id,...d.data()})).filter(c=>teamResourceMatches(c));
-    ensureBotChannelExists();renderSidebarChannels();
+    const dbChans=snap.docs.map(d=>({id:d.id,...d.data()})).filter(c=>teamResourceMatches(c));
+    channels=mergeWithTeamFallback(dbChans, teamChannelFallback(activeTeam));
+    ensureBotChannelExists();
+    renderSidebarChannels();
     if(typeof applyCurrentChannelAdminState==='function')applyCurrentChannelAdminState();
     if(currentChannelId&&!canSeeChannel(channels.find(c=>c.id===currentChannelId))){toast('이 채널에 대한 접근 권한이 변경되었습니다.');showDashboard();}
-  },e=>console.warn('channels listener error',e));
+  },e=>{
+    console.warn('channels listener error',e);
+    channels=teamChannelFallback(activeTeam);
+    renderSidebarChannels();
+  });
 }
 async function seedDefaultStructure(team=activeTeam){
   try{
@@ -1736,7 +1766,7 @@ function openChatChannel(chanId){
     if(snap.empty){
       list.innerHTML='<div class="empty-chan"><div class="big">💬</div><div>아직 메시지가 없습니다. 첫 메시지를 보내보세요.</div></div>';
     } else {
-      snap.forEach(d=>{const m=d.data();if(teamResourceMatches(m))renderMessage(d.id,m);});
+      snap.forEach(d=>{const m=d.data();if(teamResourceMatches(m) || (activeTeam===TEAM_CCE && !m.team && String(chanId).startsWith('cce-')))renderMessage(d.id,m);});
       if(!list.children.length)list.innerHTML='<div class="empty-chan"><div class="big">💬</div><div>현재 워크스페이스의 메시지가 없습니다.</div></div>';
     }
     if(nearBottom) list.scrollTop=list.scrollHeight;
