@@ -569,7 +569,7 @@
   }
   @media (max-width:420px){
     .dday-num{font-size:28px;}
-    .search-box{ display:none !important; }
+    .search-box{ width:100%; flex-basis:100%; order:4; margin:0; }
     .auth-box{ max-width:100%; }
   }
   /* iOS: avoid input auto-zoom by keeping form fields >=16px on touch */
@@ -681,6 +681,20 @@
   .admin50-table{display:block;overflow-x:auto}
 }
 
+
+/* Keep all controls reachable without pushing small screens sideways. */
+@media(max-width:700px){
+ .topbar{height:auto;min-height:52px;flex-wrap:wrap;padding:8px 10px;row-gap:4px;}
+ .topbar .chan-title{min-width:0;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+ .topbar-right{order:3;width:100%;max-width:100%;min-width:0;margin-left:0;justify-content:flex-end;overflow-x:auto;}
+ .search-box{order:4;flex-basis:100%;width:100%;margin:0;}
+ .search-box input{min-width:0;}
+ .msg-row{flex-wrap:wrap;}
+ .msg-row .msg-body{flex-basis:calc(100% - 44px);}
+ .msg-actions{flex-basis:100%;flex-wrap:wrap;margin-left:36px;}
+ .cal-cell{min-width:0;}
+}
+
 </style>
 </head>
 <body>
@@ -697,7 +711,7 @@
     </div>
 
     <div id="loginForm">
-      <h1 class="auth-h">팀에 로그인하세요</h1>
+      <div class="auth-team-hint" role="note">Supabase 이전 후 처음 이용하는 기존 회원은 기존 이메일로 한 번 가입하고 메일 인증을 완료하세요. 닉네임과 역할은 기존 정보로 연결됩니다.</div><h1 class="auth-h">팀에 로그인하세요</h1>
       <p class="auth-p">NEXTBOT 계정으로 로그인합니다.</p>
       <div class="auth-msg" id="loginMsg"></div>
       <div class="field"><label>이메일</label><input type="email" id="loginEmail" autocomplete="username"></div>
@@ -870,33 +884,25 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signOut, sendPasswordResetEmail, updateProfile, setPersistence, browserLocalPersistence
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, addDoc, query,
-  orderBy, onSnapshot, serverTimestamp, where, limit, getDocs, arrayUnion, arrayRemove, runTransaction, increment
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import {
-  getDatabase, ref, set, onValue, onDisconnect, remove, push, serverTimestamp as rtdbTimestamp, off
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+ initializeApp,getAuth,getFirestore,getDatabase,onAuthStateChanged,createUserWithEmailAndPassword,
+ signInWithEmailAndPassword,signOut,sendPasswordResetEmail,updateProfile,setPersistence,browserLocalPersistence,
+ doc,setDoc,getDoc,updateDoc,deleteDoc,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp,where,limit,getDocs,
+ arrayUnion,arrayRemove,runTransaction,increment,ref,set,onValue,onDisconnect,remove,push,rtdbTimestamp,off,
+ signUpMember,completePasswordReset
+} from "./supabase-bridge.mjs";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAUwzRx2lEzogeJGRZfre5ghDkHuEoyz3E",
-  authDomain: "robofest-nextbot.firebaseapp.com",
-  projectId: "robofest-nextbot",
-  storageBucket: "robofest-nextbot.firebasestorage.app",
-  messagingSenderId: "770591063404",
-  appId: "1:770591063404:web:28a2494ba096443c8c0749",
-  databaseURL: "https://robofest-nextbot-default-rtdb.asia-southeast1.firebasedatabase.app"
+const backendConfig={
+ url:"https://lyxkmvaweoeqayvjteof.supabase.co",
+ publishableKey:"sb_publishable_AzKULYWpCxOT7u3AJq4l6w_EEH3t6wo",
+ projectId:"lyxkmvaweoeqayvjteof",
+ authDomain:"lyxkmvaweoeqayvjteof.supabase.co",
+ databaseURL:"https://lyxkmvaweoeqayvjteof.supabase.co"
 };
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const rtdb = getDatabase(app);
-const ADMIN_EMAIL = "studiovoidsurpport@gmail.com";
+const app=initializeApp(backendConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const rtdb=getDatabase(app);
 
 const TEAM_ROBOFEST="robofest";
 const TEAM_CCE="cce";
@@ -923,9 +929,7 @@ function teamFromEmail(email){
 }
 function userTeam(u){return u?.team||teamFromEmail(u?.email);}
 function teamResourceMatches(resource,team=activeTeam){return (resource?.team||TEAM_ROBOFEST)===team;}
-function isTeamLeadAccount(u=myDoc){
-  return !!u&&String(u.nickname||"").trim()===TEAM_LEAD_NICKNAME&&(u.roles||[]).includes("leader");
-}
+function isTeamLeadAccount(u=myDoc){return !!u?.isAdmin;}
 function teamLabel(team=activeTeam){const d=TEAM_DEFS[team]||TEAM_DEFS[TEAM_ROBOFEST];return `${d.icon} ${d.label}`;}
 function teamSettingId(name,team=activeTeam){return team===TEAM_ROBOFEST&&name==="dday"?"dday":`${name}-${team}`;}
 function teamSettingRef(name,team=activeTeam){return doc(db,"settings",teamSettingId(name,team));}
@@ -1167,9 +1171,16 @@ function toast(text){
   const t=document.createElement('div'); t.className='toast'; t.textContent=text;
   $('toastWrap').appendChild(t); setTimeout(()=>t.remove(),3200);
 }
-function escapeHtml(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeHtml(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function safeLinkUrl(value){try{const url=new URL(String(value||''));return ['https:','http:'].includes(url.protocol)?url.href:'';}catch{return '';}}
+function safeImageUrl(value){
+ const raw=String(value||'');
+ if(/^data:image\/(?:png|jpeg|gif|webp|svg\+xml);/i.test(raw))return raw;
+ try{const url=new URL(raw,location.href);return ['https:','http:'].includes(url.protocol)?url.href:'';}catch{return '';}
+}
+
 function linkify(text){
-  return text.replace(/(https?:\/\/[^\s]+)/g, (u)=>`<a class="link-auto" href="${u}" target="_blank" rel="noopener">${u}</a>`);
+  return text.replace(/(https?:\/\/[^\s]+)/g, (u)=>`<a class="link-auto" href="${escapeHtml(u)}" target="_blank" rel="noopener noreferrer">${escapeHtml(u)}</a>`);
 }
 function extractEmbedUrl(text){
   const m=(text||'').match(/(https?:\/\/[^\s]+)/);
@@ -1179,12 +1190,12 @@ function buildEmbedHtml(text){
   const url=extractEmbedUrl(text);
   if(!url) return '';
   if(/\.(png|jpe?g|gif|webp)(\?.*)?$/i.test(url)){
-    return `<div class="msg-embed"><img src="${url}" loading="lazy" alt=""></div>`;
+    return `<div class="msg-embed"><img src="${escapeHtml(safeImageUrl(url))}" loading="lazy" alt=""></div>`;
   }
   const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{6,15})/);
   if(yt){
     const vid=yt[1];
-    return `<div class="msg-embed"><a class="yt-embed" href="${url}" target="_blank" rel="noopener">
+    return `<div class="msg-embed"><a class="yt-embed" href="${escapeHtml(url)}" target="_blank" rel="noopener">
       <img class="yt-thumb" src="https://img.youtube.com/vi/${vid}/mqdefault.jpg" alt="">
       <span class="yt-txt">▶ YouTube 영상 열기</span></a></div>`;
   }
@@ -1300,97 +1311,71 @@ function primaryRoleColor(roles){
   return ROLE_DEFS.member.color;
 }
 
-/* ---------------- Auth screen wiring ---------------- */
-$('toSignup').onclick=()=>{ $('loginForm').classList.add('hidden'); $('signupForm').classList.remove('hidden'); };
-$('toLogin').onclick=()=>{ $('signupForm').classList.add('hidden'); $('loginForm').classList.remove('hidden'); };
-
-function showMsg(id, text, ok=false){
-  const el=$(id); el.textContent=text; el.className='auth-msg show '+(ok?'ok':'err');
-}
-
-$('signupBtn').onclick = async ()=>{
-  const nick=$('suNick').value.trim(), email=$('suEmail').value.trim(), pw=$('suPw').value;
-  if(!nick||!email||!pw){ showMsg('signupMsg','모든 항목을 입력해주세요.'); return; }
-  if(pw.length<6){ showMsg('signupMsg','비밀번호는 6자 이상이어야 합니다.'); return; }
-  $('signupBtn').disabled=true;
-  try{
-    const cred = await createUserWithEmailAndPassword(auth, email, pw);
-    await updateProfile(cred.user, { displayName: nick });
-    const isAdmin=email.toLowerCase()===ADMIN_EMAIL;
-    const team=teamFromEmail(email);
-    await setDoc(doc(db,'users',cred.user.uid),{
-      email,nickname:nick,photoURL:'',roles:isAdmin?['leader']:['member'],
-      isAdmin,team,createdAt:serverTimestamp(),lastSeen:serverTimestamp()
-    });
-    const ids=teamBotIds(team);
-    sendBotMessage(ids.channelId,`👋 ${nick}님이 오셨어요! ${teamLabel(team)} 팀에 오신 것을 환영합니다 🎉`,cred.user.uid,'',{},team);
-    toast('회원가입이 완료되었습니다.');
-  }catch(e){ showMsg('signupMsg', translateAuthErr(e)); }
-  $('signupBtn').disabled=false;
-};
-
-$('loginBtn').onclick = async ()=>{
-  const email=$('loginEmail').value.trim(), pw=$('loginPw').value;
-  if(!email||!pw){ showMsg('loginMsg','이메일과 비밀번호를 입력해주세요.'); return; }
-  $('loginBtn').disabled=true;
-  try{
-    await setPersistence(auth, browserLocalPersistence);
-    await signInWithEmailAndPassword(auth, email, pw);
-  }catch(e){ showMsg('loginMsg', translateAuthErr(e)); }
-  $('loginBtn').disabled=false;
-};
-
-$('forgotBtn').onclick = async ()=>{
-  const email=$('loginEmail').value.trim();
-  if(!email){ showMsg('loginMsg','비밀번호 재설정을 위해 이메일을 먼저 입력해주세요.'); return; }
-  try{ await sendPasswordResetEmail(auth, email); showMsg('loginMsg','비밀번호 재설정 이메일을 보냈습니다.', true); }
-  catch(e){ showMsg('loginMsg', translateAuthErr(e)); }
-};
-
+/* ---------------- Supabase authentication ---------------- */
+$('toSignup').onclick=()=>{$('loginForm').classList.add('hidden');$('signupForm').classList.remove('hidden');};
+$('toLogin').onclick=()=>{$('signupForm').classList.add('hidden');$('loginForm').classList.remove('hidden');};
+function showMsg(id,text,ok=false){const el=$(id);el.textContent=text;el.className='auth-msg show '+(ok?'ok':'err');}
 function translateAuthErr(e){
-  const c=e.code||'';
-  const map={
-    'auth/email-already-in-use':'이미 사용 중인 이메일입니다.',
-    'auth/invalid-email':'이메일 형식이 올바르지 않습니다.',
-    'auth/weak-password':'비밀번호가 너무 약합니다.',
-    'auth/user-not-found':'존재하지 않는 계정입니다.',
-    'auth/wrong-password':'비밀번호가 올바르지 않습니다.',
-    'auth/invalid-credential':'이메일 또는 비밀번호가 올바르지 않습니다.',
-    'auth/too-many-requests':'잠시 후 다시 시도해주세요.',
-  };
-  return map[c] || ('오류가 발생했습니다: '+c);
+ const messages={invalid_credentials:'이메일 또는 비밀번호를 확인해주세요.',email_not_confirmed:'이메일 인증을 먼저 완료해주세요.',
+ user_already_exists:'이미 가입한 이메일입니다. 로그인 또는 비밀번호 재설정을 이용해주세요.',
+ over_email_send_rate_limit:'인증 메일 발송 한도입니다. 잠시 후 다시 시도해주세요.',
+ email_address_not_authorized:'메일 발송 설정이 필요합니다. 관리자에게 문의해주세요.',
+ weak_password:'비밀번호를 8자 이상으로 입력해주세요.'};
+ return messages[e.code]||e.message||'요청을 처리하지 못했습니다.';
 }
-
-/* ---------------- Auth state ---------------- */
-onAuthStateChanged(auth,async(user)=>{
-  if(user){
-    currentUser=user;
-    const uref=doc(db,'users',user.uid);
-    const resolvedTeam=teamFromEmail(user.email);
-    let snap=await getDoc(uref);
-    if(!snap.exists()){
-      const isAdmin=user.email.toLowerCase()===ADMIN_EMAIL;
-      await setDoc(uref,{
-        email:user.email,nickname:user.displayName||user.email.split('@')[0],photoURL:'',
-        roles:isAdmin?['leader']:['member'],isAdmin,team:resolvedTeam,
-        createdAt:serverTimestamp(),lastSeen:serverTimestamp()
-      });
-      snap=await getDoc(uref);
-      const ids=teamBotIds(resolvedTeam);
-      sendBotMessage(ids.channelId,`👋 ${user.displayName||user.email.split('@')[0]}님이 오셨어요! ${teamLabel(resolvedTeam)} 팀에 오신 것을 환영합니다 🎉`,user.uid,'',{},resolvedTeam);
-    }else if(!snap.data()?.team||snap.data().team!==resolvedTeam){
-      await updateDoc(uref,{team:resolvedTeam});
-      snap=await getDoc(uref);
-    }
-    myDoc={uid:user.uid,...snap.data()};
-    activeTeam=resolvedTeam;refreshTeamBotIds();
-    if(myDoc.disabled){
-      await signOut(auth);showMsg('loginMsg','관리자에 의해 비활성화된 계정입니다.');return;
-    }
-    enterApp();
-  }else{
-    currentUser=null;myDoc=null;activeTeam=TEAM_ROBOFEST;refreshTeamBotIds();exitApp();
-  }
+$('signupBtn').onclick=async()=>{
+ const nickname=$('suNick').value.trim(),email=$('suEmail').value.trim(),password=$('suPw').value;
+ if(!nickname||!email||!password){showMsg('signupMsg','모든 항목을 입력해주세요.');return;}
+ if(nickname.length>40||password.length<8){showMsg('signupMsg','닉네임은 40자 이하, 비밀번호는 8자 이상으로 입력해주세요.');return;}
+ $('signupBtn').disabled=true;
+ try{
+  const result=await signUpMember(email,password,nickname);
+  if(!result.session)showMsg('signupMsg','인증 메일을 보냈습니다. 메일의 링크를 눌러 인증한 뒤 로그인하세요. 기존 회원 정보는 인증 후 연결됩니다.',true);
+  else showMsg('signupMsg','가입되었습니다. 계정 정보를 연결하는 중입니다.',true);
+ }catch(e){showMsg('signupMsg',translateAuthErr(e));}
+ finally{$('signupBtn').disabled=false;}
+};
+$('loginBtn').onclick=async()=>{
+ const email=$('loginEmail').value.trim(),password=$('loginPw').value;
+ if(!email||!password){showMsg('loginMsg','이메일과 비밀번호를 입력해주세요.');return;}
+ $('loginBtn').disabled=true;
+ try{await signInWithEmailAndPassword(auth,email,password);}
+ catch(e){showMsg('loginMsg',translateAuthErr(e));}
+ finally{$('loginBtn').disabled=false;}
+};
+$('forgotBtn').onclick=async()=>{
+ const email=$('loginEmail').value.trim();
+ if(!email){showMsg('loginMsg','이메일을 먼저 입력해주세요.');return;}
+ try{await sendPasswordResetEmail(auth,email);showMsg('loginMsg','가입된 이메일이면 비밀번호 재설정 안내가 발송됩니다.',true);}
+ catch(e){showMsg('loginMsg',translateAuthErr(e));}
+};
+let backendErrorAt=0;
+window.addEventListener('nextbot-backend-error',event=>{
+ const message=event.detail?.message||'연결에 실패했습니다.';
+ if(Date.now()-backendErrorAt<1500)return;backendErrorAt=Date.now();
+ if(!$('appView').classList.contains('show'))showMsg('loginMsg',message);
+ else toast(message);
+});
+window.addEventListener('nextbot-password-recovery',()=>{
+ openModal('<h3>새 비밀번호 설정</h3><div class="field"><label for="newAccountPassword">새 비밀번호</label><input type="password" autocomplete="new-password" id="newAccountPassword" minlength="8"></div><div id="passwordResetResult" role="status"></div><button class="btn btn-primary" id="saveAccountPassword">비밀번호 저장</button>');
+ $('saveAccountPassword').onclick=async()=>{
+  const password=$('newAccountPassword').value;
+  if(password.length<8){$('passwordResetResult').textContent='8자 이상 입력해주세요.';return;}
+  $('saveAccountPassword').disabled=true;
+  try{await completePasswordReset(password);closeModal();toast('비밀번호를 변경했습니다.');}
+  catch(e){$('passwordResetResult').textContent=translateAuthErr(e);$('saveAccountPassword').disabled=false;}
+ };
+});
+onAuthStateChanged(auth,async user=>{
+ if(!user){currentUser=null;myDoc=null;activeTeam=TEAM_ROBOFEST;refreshTeamBotIds();exitApp();return;}
+ try{
+  const snap=await getDoc(doc(db,'users',user.uid));
+  if(!snap.exists())throw new Error('회원 연결을 완료하지 못했습니다. 관리자에게 문의해주세요.');
+  currentUser=user;myDoc={uid:user.uid,...snap.data()};
+  activeTeam=myDoc.team||teamFromEmail(user.email);refreshTeamBotIds();
+  if(myDoc.disabled){await signOut(auth);showMsg('loginMsg','비활성화된 계정입니다.');return;}
+  enterApp();
+ }catch(e){exitApp();showMsg('loginMsg',translateAuthErr(e));}
 });
 
 function stopTeamDataListeners(){
@@ -1420,7 +1405,7 @@ function updateTeamSwitcherUI(){
   document.title=`NEXTBOT ULTRA | ${def.label}`;
 }
 async function switchActiveTeam(team){
-  if(!isTeamLeadAccount()){toast('워크스페이스 전환은 임휘승 팀장만 사용할 수 있습니다.');return;}
+  if(!isTeamLeadAccount()){toast('워크스페이스 전환은 관리자만 사용할 수 있습니다.');return;}
   if(!TEAM_DEFS[team]||team===activeTeam)return;
   activeTeam=team;refreshTeamBotIds();mvpCycleChecked=false;structureSeeded=false;
   currentChannelId=null;currentChannelName=null;categories=[];channels=[];usersMap={BOT:BOT_USER};
@@ -1454,7 +1439,7 @@ function enterApp(){
   loadDdaySetting();
   if(activeTeam===TEAM_ROBOFEST&&isTeamLeadAccount())migrateLegacyRobofestData();
   showDashboard();
-  setTimeout(()=>recoverPendingBotTasks(),700);
+  // Old pending AI jobs refer to discarded chat history and are not resumed.
 }
 
 function renderAvatarInto(el, url, nick){
@@ -1506,7 +1491,7 @@ function avatarHtml(u, size=28){
   const uid = u? u.uid : '';
   const online = presenceData[uid] && presenceData[uid].state==='online';
   if(url){
-    return `<span class="avatar" style="width:${size}px;height:${size}px;"><img src="${url}"><span class="status-dot ${online?'online':''}"></span></span>`;
+    return `<span class="avatar" style="width:${size}px;height:${size}px;"><img src="${escapeHtml(safeImageUrl(url))}"><span class="status-dot ${online?'online':''}"></span></span>`;
   }
   return `<span class="avatar" style="width:${size}px;height:${size}px;">${escapeHtml(nick.slice(0,1))}<span class="status-dot ${online?'online':''}"></span></span>`;
 }
@@ -1622,21 +1607,7 @@ async function seedDefaultStructure(team=activeTeam){
     if(team===TEAM_ROBOFEST)await migrateLegacyRobofestData();
   }catch(e){console.error('seed error',e);}
 }
-async function migrateLegacyRobofestData(){
-  if(!isTeamLeadAccount())return;
-  try{
-    const [cats,chans]=await Promise.all([getDocs(collection(db,'categories')),getDocs(collection(db,'channels'))]);
-    await Promise.all([
-      ...cats.docs.filter(d=>!d.data()?.team).map(d=>updateDoc(d.ref,{team:TEAM_ROBOFEST})),
-      ...chans.docs.filter(d=>!d.data()?.team).map(d=>updateDoc(d.ref,{team:TEAM_ROBOFEST}))
-    ]);
-    for(const name of ['announcements','events','tests','strategies','missions','practices','records']){
-      const snap=await getDocs(collection(db,name));
-      const writes=snap.docs.filter(d=>!d.data()?.team).map(d=>updateDoc(d.ref,{team:TEAM_ROBOFEST}));
-      if(writes.length)await Promise.all(writes);
-    }
-  }catch(e){console.warn('legacy ROBOFEST migration skipped',e);}
-}
+async function migrateLegacyRobofestData(){ /* The SQL import already normalized legacy teams. */ }
 let botChannelEnsureInFlight=false;
 async function ensureBotChannelExists(){
   if(botChannelEnsureInFlight)return;
@@ -1798,7 +1769,7 @@ function openChatChannel(chanId){
   $('searchBtn').classList.remove('hidden');
   $('exportBtn').classList.remove('hidden');
   $('msgList').innerHTML='';
-  const q = query(collection(db,'channels',chanId,'messages'), orderBy('createdAt','asc'), limit(200));
+  const q = query(collection(db,'channels',chanId,'messages'), orderBy('createdAt','desc'), limit(200));
   msgUnsub = onSnapshot(q, (snap)=>{
     const list=$('msgList');
     const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 120;
@@ -1806,7 +1777,7 @@ function openChatChannel(chanId){
     if(snap.empty){
       list.innerHTML='<div class="empty-chan"><div class="big">💬</div><div>아직 메시지가 없습니다. 첫 메시지를 보내보세요.</div></div>';
     } else {
-      snap.forEach(d=>{const m=d.data();if(teamResourceMatches(m) || (activeTeam===TEAM_CCE && !m.team && String(chanId).startsWith('cce-')))renderMessage(d.id,m);});
+      snap.docs.slice().reverse().forEach(d=>{const m=d.data();if(teamResourceMatches(m) || (activeTeam===TEAM_CCE && !m.team && String(chanId).startsWith('cce-')))renderMessage(d.id,m);});
       if(!list.children.length)list.innerHTML='<div class="empty-chan"><div class="big">💬</div><div>현재 워크스페이스의 메시지가 없습니다.</div></div>';
     }
     if(nearBottom) list.scrollTop=list.scrollHeight;
@@ -1902,23 +1873,23 @@ function renderMessage(id, m){
   row.className='msg-row'; row.dataset.id=id;
   let replyHtml='';
   if(m.replyTo){
-    replyHtml=`<div class="msg-reply-ref" data-jump="${m.replyTo.id||''}">↩ ${escapeHtml(m.replyTo.nickname||'')}: ${escapeHtml((m.replyTo.snippet||'').slice(0,60))}</div>`;
+    replyHtml=`<div class="msg-reply-ref" data-jump="${escapeHtml(m.replyTo.id||'')}">↩ ${escapeHtml(m.replyTo.nickname||'')}: ${escapeHtml((m.replyTo.snippet||'').slice(0,60))}</div>`;
   }
   const canPin=myDoc.isAdmin||(myDoc.roles||[]).includes('leader');
   const canManageTeamMessage=isTeamLeadAccount()||!!myDoc.isAdmin;
   const isPoll=m.type==='poll';
   const attachHtml = (m.attachments && m.attachments.length)
-    ? `<div class="attach-list">${m.attachments.map(a=>`<a class="attach-item" href="${escapeHtml(a.url)}" target="_blank" rel="noopener">📎 ${escapeHtml(a.name)}</a>`).join('')}</div>`
+    ? `<div class="attach-list">${m.attachments.map(a=>`<a class="attach-item" href="${escapeHtml(safeLinkUrl(a.url))}" target="_blank" rel="noopener">📎 ${escapeHtml(a.name)}</a>`).join('')}</div>`
     : '';
   const bodyHtml = isPoll
     ? renderPoll(id, m)
-    : `${m.content?`<div class="msg-text" data-text>${renderMentions(m.content||'')}</div>${buildEmbedHtml(m.content||'')}`:''}${m.botMetaHtml||''}${attachHtml}`;
+    : `${m.content?`<div class="msg-text" data-text>${renderMentions(m.content||'')}</div>${buildEmbedHtml(m.content||'')}`:''}${window.DOMPurify?DOMPurify.sanitize(m.botMetaHtml||''):escapeHtml(m.botMetaHtml||'')}${attachHtml}`;
   row.innerHTML = `
     ${avatarHtml(u,34)}
     <div class="msg-body">
       ${replyHtml}
       <div class="msg-head">
-        <span class="msg-nick">${escapeHtml(u.nickname||'알 수 없음')}</span>
+        <span class="msg-nick">${escapeHtml(u.nickname||'알 수 없음')}</span>${asBot?'<span class="msg-edited">요청: '+escapeHtml(m.botActorNickname||'팀원')+'</span>':''}
         <span class="role-badge" style="color:${roleColor}; background:${roleColor}22;">${escapeHtml(roleTxt)}</span>
         <span class="msg-time" title="${escapeHtml(fullDateTime(m.createdAt))}">${fmtTime(m.createdAt)}</span>
         ${m.editedAt?'<span class="msg-edited">(수정됨)</span>':''}
@@ -1995,7 +1966,7 @@ function renderReactions(box, msgId, reactions){
   const entries = Object.entries(reactions).filter(([emoji,uids])=>uids && uids.length);
   box.innerHTML = entries.map(([emoji,uids])=>{
     const mine = uids.includes(currentUser.uid);
-    return `<span class="reaction-chip ${mine?'mine':''}" data-emoji="${emoji}">${emoji} ${uids.length}</span>`;
+    return `<span class="reaction-chip ${mine?'mine':''}" data-emoji="${escapeHtml(emoji)}">${escapeHtml(emoji)} ${uids.length}</span>`;
   }).join('') + `<span class="reaction-add" data-addreact>+</span>`;
   box.querySelectorAll('[data-emoji]').forEach(chip=>chip.onclick=()=>toggleReaction(msgId, chip.getAttribute('data-emoji')));
   box.querySelector('[data-addreact]').onclick=(e)=>openReactionPicker(e.currentTarget, msgId);
@@ -2157,7 +2128,7 @@ async function sendMessage(){
   if(pendingAttachments.length) payload.attachments = pendingAttachments.slice();
   try{
     await addDoc(collection(db,'channels',currentChannelId,'messages'), payload);
-    updateDoc(doc(db,'channels',currentChannelId), { lastMessageAt: serverTimestamp() }).catch(()=>{});
+    // Channel activity is updated atomically by the server.
     pushMentionNotifications(payload.mentions, text);
     // /순위를 바로 실행해도 방금 보낸 메시지가 포함되도록 통계 기록을 기다립니다.
     // 통계 권한 설정이 잘못돼도 이미 성공한 메시지 전송 자체를 실패로 처리하지는 않습니다.
@@ -2168,7 +2139,7 @@ async function sendMessage(){
     pendingAttachments=[]; renderAttachPreview();
   }catch(e){
     console.error('send message error', e);
-    toast(e && e.code==='permission-denied' ? '이 채널에 메시지를 보낼 권한이 없어요. (채널 설정을 확인해주세요)' : '메시지 전송에 실패했어요. 다시 시도해주세요.');
+    toast(e && e.code==='permission-denied' ? '이 채널에 메시지를 보낼 권한이 없어요. (채널 설정을 확인해주세요)' : (e.message||'메시지 전송에 실패했어요. 다시 시도해주세요.'));
     $('sendBtn').disabled = !msgInput.value.trim() && !pendingAttachments.length;
   }
   setTypingState(false);
@@ -2194,7 +2165,7 @@ async function sendBotMessage(channelId,content,actingUid,botMetaHtml,botExtra={
     const taskKey=botExtra?.botTaskId ? `bot-${String(botExtra.botTaskId).replace(/[^a-zA-Z0-9_-]/g,'_')}` : '';
     if(taskKey) await setDoc(doc(db,'channels',channelId,'messages',taskKey),payload,{merge:true});
     else await addDoc(collection(db,'channels',channelId,'messages'), payload);
-    updateDoc(doc(db,'channels',channelId), { lastMessageAt: serverTimestamp() }).catch(()=>{});
+    // Channel activity is updated atomically by the server.
   }catch(e){ console.error('bot message error', e); throw e; }
 }
 function postBotReply(text){
@@ -2452,133 +2423,8 @@ function notifyBotCompletion(task,answer){
     }
   }catch(_e){}
 }
-async function streamGeminiAnswer(apiKey,model,prompt,onText){
-  const url=`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse&key=${encodeURIComponent(apiKey)}`;
-  // 긴 코드/문서가 2048토큰에서 잘리던 문제를 해결합니다. 기본 출력 한도를 크게 올리고,
-  // 그래도 MAX_TOKENS로 끝나면 같은 답변을 이어 쓰도록 최대 3회 자동 연결합니다.
-  const MAX_OUTPUT_TOKENS=32768;
-  const MAX_CONTINUATIONS=3;
-  let answer='',usage={},lastFinishReason='';
-  const mergeUsage=(u)=>{
-    if(!u)return;
-    const keys=['promptTokenCount','candidatesTokenCount','totalTokenCount','cachedContentTokenCount'];
-    for(const k of keys){if(Number.isFinite(Number(u[k])))usage[k]=(Number(usage[k])||0)+Number(u[k]);}
-    for(const [k,v] of Object.entries(u)){if(!(k in usage))usage[k]=v;}
-  };
-  const request=async(reqPrompt,maxTokens)=>{
-    const body={contents:[{role:'user',parts:[{text:reqPrompt}]}],generationConfig:{temperature:0.35,maxOutputTokens:maxTokens}};
-    let res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    if(!res.ok){
-      let data={};try{data=await res.json();}catch(_e){}
-      // 일부 모델/프로젝트가 32768을 허용하지 않는 경우 16384로 한 번 낮춰 재시도합니다.
-      if((res.status===400||res.status===413) && maxTokens>16384){
-        res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,generationConfig:{temperature:0.35,maxOutputTokens:16384}})});
-      }
-      if(!res.ok){data={};try{data=await res.json();}catch(_e){}const msg=data?.error?.message||`Gemini API 오류 (${res.status})`;const friendly=res.status===403?'Gemini 프로젝트 접근 권한이 거부되었습니다. 관리자 API 키/프로젝트 상태를 확인해주세요.':res.status===429?'Gemini 요청 한도에 도달했습니다. 잠시 후 다시 시도해주세요.':res.status===404?'선택한 Gemini 모델을 찾을 수 없습니다. 관리자 페이지에서 모델을 확인해주세요.':msg;throw new Error(friendly);}
-    }
-    if(!res.body)throw new Error('이 브라우저에서는 Gemini 스트리밍을 지원하지 않습니다.');
-    const reader=res.body.getReader(),decoder=new TextDecoder('utf-8');let buffer='',partAnswer='';
-    const consume=async raw=>{for(const line of raw.split(/\r?\n/)){const t=line.trim();if(!t||!t.startsWith('data:'))continue;const payload=t.slice(5).trim();if(payload==='[DONE]')continue;try{const obj=JSON.parse(payload),parts=obj?.candidates?.[0]?.content?.parts||[],chunk=parts.map(x=>x.text||'').join('');if(obj?.usageMetadata)mergeUsage(obj.usageMetadata);const reason=obj?.candidates?.[0]?.finishReason;if(reason)lastFinishReason=reason;if(chunk){partAnswer+=chunk;answer+=chunk;onText(answer);}}catch(_e){}}};
-    while(true){const {value,done}=await reader.read();if(done)break;buffer+=decoder.decode(value,{stream:true});const events=buffer.split(/\n\n/);buffer=events.pop()||'';for(const ev of events)await consume(ev);}buffer+=decoder.decode();if(buffer.trim())await consume(buffer);
-    return partAnswer;
-  };
-  let continuation=0;
-  let reqPrompt=prompt;
-  while(true){
-    lastFinishReason='';
-    await request(reqPrompt,MAX_OUTPUT_TOKENS);
-    if(lastFinishReason!=='MAX_TOKENS'||continuation>=MAX_CONTINUATIONS)break;
-    continuation++;
-    // 이전 출력 전체를 기준으로 이어 쓰게 하여 코드블록/문서가 중간에서 끊겨도 자동 완성합니다.
-    reqPrompt=`${prompt}
-
-=== 지금까지 생성된 답변 ===
-${answer}
-
-=== 이어쓰기 지침 ===
-위 답변은 출력 토큰 한도 때문에 중간에서 끊겼습니다. 위 내용을 절대 반복하거나 처음부터 다시 쓰지 말고, 마지막 문자 바로 다음부터 자연스럽게 이어서 작성하세요. 코드라면 기존 코드의 정확한 다음 줄부터 계속하고, 필요한 닫는 괄호/태그/코드블록까지 완전하게 마무리하세요. 설명 없이 이어지는 내용만 출력하세요.`;
-  }
-  return {text:answer.trim(),usage};
-}
-async function handleBotChatCommand(question){
-  if(!question){toast('사용법: /봇채팅 질문');return;}
-  const freshUser=(await getDoc(doc(db,'users',currentUser.uid))).data()||myDoc||{},balance=botTokensOf(freshUser);
-  if(balance<BOT_CHAT_MIN_COST){toast(`봇 토큰이 부족합니다. 현재 ${balance}개`);return;}
-  const settings=await getBotSettings(),apiKey=String(settings.apiKey||'').trim();let model=String(settings.model||BOT_DEFAULT_MODEL).trim();
-  if(BOT_LEGACY_MODEL_FALLBACKS[model])model=BOT_LEGACY_MODEL_FALLBACKS[model];if(!BOT_MODEL_OPTIONS.includes(model))model=BOT_DEFAULT_MODEL;if(!apiKey){toast('관리자가 Gemini API 키를 설정하지 않았습니다.');return;}
-  const taskId=++botTaskSeq;
-  // 현재 채널을 작업에 고정합니다. 이후 다른 채널로 이동해도 이 작업의 출력 대상은 변하지 않습니다.
-  const task={id:taskId,channelId:currentChannelId,channelName:currentChannelName||'채팅방',startedAt:Date.now(),done:false,question:String(question),model,phase:'queued',partial:''};
-  botTasks.set(taskId,task);
-  void persistBotTask(task,true);
-  renderBotTaskIndicator();
-  const started=performance.now();let consumed=false,answer='',usage={},finalCost=BOT_CHAT_MIN_COST;
-  try{
-    await runTransaction(db,async tx=>{const uref=doc(db,'users',currentUser.uid),usnap=await tx.get(uref),left=botTokensOf(usnap.data());if(left<BOT_CHAT_MIN_COST)throw new Error('봇 토큰이 부족합니다.');tx.update(uref,{botTokens:left-BOT_CHAT_MIN_COST});consumed=true;});
-    task.phase='generating'; persistBotTask(task);
-    const history=await collectAllChatForBot(),actorName=myDoc?.nickname||currentUser.displayName||'사용자';
-    const defaultBotPrompt='당신은 이 팀 채팅 서비스의 AI 봇 NEXTBOT입니다. 사용자의 요청에 직접 답하세요. 과거 채팅 기록은 필요한 경우 참고 자료로 사용하세요. 기록에 없는 사실도 사용자가 새로운 창작, 코딩, 게임, HTML, Python 등의 생성을 요청한다면 직접 새로 만들어 제공할 수 있습니다. 기록에 없는 과거 사실을 사실인 것처럼 지어내지는 마세요. 답변은 한국어로, 필요한 경우 Markdown을 사용하세요(제목, 굵게, 기울임, 취소선, 목록, 표, 코드블록 등). 코드나 긴 문서를 요청받으면 절대 임의로 생략하거나 요약하지 말고 실행 가능한 완성본 전체를 제공하세요. 출력 한도에 닿으면 자동으로 이어서 완성해야 하며, 코드의 중간 부분을 생략했다는 식의 축약 표현을 사용하지 마세요.';
-    const baseBotPrompt=String(settings.defaultPrompt||defaultBotPrompt).trim()||defaultBotPrompt;
-    const prompt=`${baseBotPrompt}
-
-${nextbotToolCatalog()}
-
-현재 질문자: ${actorName}
-
-=== 전체 채팅 기록 ===
-${history}
-
-=== 질문 ===
-${question}`;
-    if(currentChannelId===task.channelId)updateBotStreamingBubble('','생성 중...',false,taskId,task.channelId);
-    // Gemini는 먼저 전체 답변을 생성한 뒤, 사용자에게는 설정된 속도로 타이핑 효과를 보여줍니다.
-    const geminiResult=await streamGeminiAnswer(apiKey,model,prompt,partial=>{ task.partial=String(partial||'').slice(-12000); task.updatedAt=Date.now(); persistBotTask(task); });
-    answer=geminiResult.text; usage=geminiResult.usage||{}; task.partial=answer; task.phase='typing'; persistBotTask(task);
-    if(!answer)throw new Error('Gemini가 빈 답변을 반환했습니다.');
-    const toolRun=await runNextbotToolCalls(answer,currentUser.uid);
-    answer=toolRun.text;
-    if(toolRun.results.length){
-      const toolSummary=toolRun.results.map(r=>r.error?`- ${r.call?.name||'tool'}: 실패 — ${r.error}`:`- ${r.call?.name||'tool'}: 실행 완료`).join('\n');
-      answer += `\n\n<details><summary>🛠️ NEXTBOT 작업 기록</summary>\n${toolSummary}\n</details>`;
-    }
-    finalCost=botCostFromUsage(usage);
-    // 처음에는 최소 1토큰을 예약하고, 실제 사용량을 받은 뒤 추가분만 안전하게 차감합니다.
-    if(finalCost>BOT_CHAT_MIN_COST){
-      const extra=finalCost-BOT_CHAT_MIN_COST;
-      await runTransaction(db,async tx=>{const uref=doc(db,'users',currentUser.uid),usnap=await tx.get(uref),left=botTokensOf(usnap.data());if(left<extra)throw new Error(`사용량 기준 ${finalCost}토큰이 필요하지만 현재 추가로 사용할 수 있는 토큰이 ${left}개뿐입니다.`);tx.update(uref,{botTokens:left-extra});});
-    }
-    const typingSpeed=Math.max(.25,Number(settings.typingSpeed||BOT_DEFAULT_TYPING_SPEED));
-    if(currentChannelId===task.channelId){
-      await animateBotTyping(answer,typingSpeed,partial=>updateBotStreamingBubble(partial,'답변 출력 중...',false,taskId,task.channelId));
-    } else {
-      // 다른 채널을 보고 있는 동안에도 생성/타이핑 시간은 동일하게 진행되도록 백그라운드에서 기다립니다.
-      await animateBotTyping(answer,typingSpeed,()=>{});
-    }
-    const ms=Math.max(0,Math.round(performance.now()-started));let stats={};try{stats=(await getDoc(doc(db,'settings','botStats'))).data()||{};}catch(e){}
-    const questions=Number(stats.questions||0)+1,answersCount=Number(stats.answers||0)+1;
-    await setDoc(doc(db,'settings','botStats'),{questions,answers:answersCount,lastLatencyMs:ms,lastPingMs:ms,lastTokenCost:finalCost,lastUsage:usage,updatedAt:serverTimestamp()},{merge:true});
-    const meta=`<div class="bot-answer-meta"><span>답변 속도: ${Math.floor(ms/60000).toString().padStart(2,'0')}분 ${Math.floor(ms/1000%60).toString().padStart(2,'0')}초</span><span>봇 핑: ${ms}ms</span><span>질문: ${questions}</span><span>답변: ${answersCount}</span><span>사용 토큰: ${finalCost}</span></div>`;
-    if(currentChannelId===task.channelId)updateBotStreamingBubble(answer,'답변 완료',true,taskId,task.channelId);
-    task.phase='saving'; persistBotTask(task);
-    await sendBotMessage(task.channelId,answer,undefined,meta,{botQuestion:question,botModel:model,botTokenCost:finalCost,botUsage:usage,botTaskId:taskId});
-    task.done=true;task.completedAt=Date.now();
-    markPersistedBotTaskDone(task);
-    notifyBotCompletion(task,answer);
-    if(currentChannelId===task.channelId)setTimeout(()=>removeBotStreamingBubble(taskId),250);
-  }catch(e){
-    console.error('Gemini bot error',e);
-    if(currentChannelId===task.channelId)removeBotStreamingBubble(taskId);
-    if(consumed){try{await updateDoc(doc(db,'users',currentUser.uid),{botTokens:increment(BOT_CHAT_MIN_COST)});}catch(_e){}}
-    void clearPersistedBotTask(task.id);
-    toast('봇 답변에 실패했습니다: '+(e.message||String(e)));
-  }finally{
-    botTasks.delete(taskId);
-    renderBotTaskIndicator();
-  }
-}
-
-
-/* ---------------- MVP 자동 선정: 주간 활동 통계 + 투표 + 발표 ---------------- */
+async function streamGeminiAnswer(){throw new Error('AI 서버 함수가 아직 연결되지 않았습니다.');}
+async function handleBotChatCommand(){toast('AI 답변은 서버 함수와 Gemini 키를 설정한 뒤 사용할 수 있습니다. 일반 채팅과 기본 명령은 사용할 수 있습니다.');}
 function getMonday(d){
   const date=new Date(d);
   const day=date.getDay(); // 0=일 ... 6=토
@@ -2598,28 +2444,7 @@ function prevWeekId(weekId){
   dt.setDate(dt.getDate()-7);
   return weekIdOf(dt);
 }
-async function bumpStat(field, uid, n=1, weekOverride=null){
-  if(!uid || !n) return;
-  const wk=weekOverride || weekIdOf(new Date());
-  const sref=doc(db,'stats',teamStatsDocId(wk));
-  try{
-    // 트랜잭션으로 동시 업데이트를 안전하게 처리하고, 리액션 취소 시 0 아래로 내려가지 않게 합니다.
-    await runTransaction(db, async tx=>{
-      const snap=await tx.get(sref);
-      const data=snap.exists() ? snap.data() : {};
-      const cur=Number((data[field]||{})[uid])||0;
-      const next=Math.max(0, cur+n);
-      if(snap.exists()){
-        tx.update(sref, { [`${field}.${uid}`]:next, updatedAt:serverTimestamp() });
-      }else{
-        tx.set(sref, { weekId:wk, [field]:{ [uid]:next }, updatedAt:serverTimestamp() });
-      }
-    });
-  }catch(e){
-    console.error('stat bump error', e);
-    throw e;
-  }
-}
+async function bumpStat(){ /* Message and reaction statistics are updated atomically by Postgres. */ }
 async function computeRanking(weekId){
   const snap=await getDoc(doc(db,'stats',teamStatsDocId(weekId)));
   const data = snap.exists() ? snap.data() : {};
@@ -2670,7 +2495,7 @@ async function createWeeklyMvpPoll(curWeek, statsWeek){
       team:activeTeam,createdAt:serverTimestamp()
     };
     const msgRef = await addDoc(collection(db,'channels',BOT_CHANNEL_ID,'messages'), pollPayload);
-    updateDoc(doc(db,'channels',BOT_CHANNEL_ID), { lastMessageAt: serverTimestamp() }).catch(()=>{});
+    // Channel activity is updated atomically by the server.
     await sendBotMessage(BOT_CHANNEL_ID, `📊 지난주 채팅 활동(메시지+리액션) 기준 TOP${top.length}이 나왔어요! 위 투표로 이번 주 MVP를 뽑아주세요. (관리자 제외)\n` +
       top.map((c,i)=>`${i+1}. ${c.nickname} — 메시지 ${c.msgCount} / 리액션 ${c.reactCount}`).join('\n'));
     await setDoc(ref, {
@@ -3402,7 +3227,7 @@ function openImageAttachModal(){
   urlInput.addEventListener('input', ()=>{
     const url=urlInput.value.trim();
     if(url && /\.(png|jpe?g|gif|webp)(\?.*)?$/i.test(url)){
-      prev.innerHTML=`<img src="${url}" alt="" onerror="this.parentElement.textContent='이미지를 불러올 수 없습니다'">`;
+      prev.innerHTML=`<img src="${escapeHtml(safeImageUrl(url))}" alt="" onerror="this.parentElement.textContent='이미지를 불러올 수 없습니다'">`;
     } else if(url){
       prev.textContent='이미지 파일 URL(.png/.jpg/.gif/.webp)을 입력해주세요';
     } else {
@@ -3794,7 +3619,7 @@ const ADMIN50_FEATURES = [
   '기본 팀원 역할 초기화','사용자 CSV','UID 복사','이메일 복사','비밀번호 재설정','닉네임 강제 변경','연락 이메일 수정','역할 편집','관리자 승격/해제','접속/LastSeen 확인',
   '사용자 주간 점수 확인','사용자 점수 초기화','카테고리 생성','카테고리 이름 변경','카테고리 순서 이동','카테고리 삭제','채널 생성','채널 이름 변경','채널 순서 이동','채널 카테고리 이동',
   '채널 접근 역할','채널 잠금','채널 보관','채널 설명','채널 메시지 비우기','채널 JSON 내보내기','공지/일정 편집·삭제','메시지 검열','전체 방송','MVP 수동 관리',
-  'Firebase 상태 점검','관리자 백업','감사 로그'
+  'Supabase 상태 점검','관리자 백업','감사 로그'
 ];
 let admin50SelectedUsers = new Set();
 let admin50Tab = 'overview';
@@ -4333,28 +4158,7 @@ function a50EditMvpUser(uid,stats){
 }
 
 /* ----- AI bot admin ----- */
-async function renderAdminBot(){
-  const body=$('adminBody');
-  const s=await getBotSettings();
-  const stats=(await getDoc(doc(db,'settings','botStats'))).data()||{};
-  body.innerHTML=`
-    <div class="admin50-card"><h4>🤖 Gemini AI 설정</h4>
-      <div class="field"><label>Gemini API 키</label><input type="password" id="a50GeminiKey" value="${escapeHtml(s.apiKey||'')}" placeholder="AIza..." autocomplete="off"></div>
-      <div class="field"><label>모델 선택</label><select id="a50GeminiModel" class="admin50-input">${BOT_MODEL_OPTIONS.map(m=>`<option value="${m}" ${(s.model||BOT_DEFAULT_MODEL)===m?'selected':''}>${m}</option>`).join('')}</select></div>
-      <div class="field"><label>답변 출력 속도</label><div class="bot-typing-setting"><input id="a50BotTypingSpeed" type="range" min="0.25" max="100" step="0.25" value="${Math.min(100,Math.max(0.25,Number(s.typingSpeed||BOT_DEFAULT_TYPING_SPEED)))}"><span id="a50BotTypingSpeedValue" class="bot-typing-value">${Math.min(100,Math.max(0.25,Number(s.typingSpeed||BOT_DEFAULT_TYPING_SPEED)))}x</span></div><div class="bot-speed-presets" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn btn-sm" data-botspeed="1">1x</button><button type="button" class="btn btn-sm" data-botspeed="3">3x</button><button type="button" class="btn btn-sm" data-botspeed="10">10x</button><button type="button" class="btn btn-sm" data-botspeed="20">20x</button><button type="button" class="btn btn-sm" data-botspeed="50">50x</button><button type="button" class="btn btn-sm btn-primary" data-botspeed="100" style="width:auto">⚡ X100</button></div><div class="admin50-muted">AI가 답변을 모두 생성한 뒤 화면에 타이핑하는 속도입니다. 슬라이더와 프리셋 모두 최대 <b>100x</b>까지 지원합니다.</div></div>
-      <div class="field"><label>⚡ NEXTBOT 권한</label><div class="admin50-muted">NEXTBOT은 팀원/채널 조회, 전체 메시지 검색, 전략·미션·연습·기록·테스트 조회, 지정 채널 메시지 게시를 수행할 수 있습니다. 관리자 요청에서는 메시지 고정과 채널 생성도 수행할 수 있습니다. 사용자가 명시적으로 요청하지 않은 쓰기 작업은 실행하지 않으며, 관리자 전용 작업은 관리자 권한을 검사합니다.</div></div>
-      <div class="field"><label>🧠 봇 기본 프롬프트</label><textarea class="field-ta" id="a50BotDefaultPrompt" rows="9" placeholder="NEXTBOT의 기본 행동과 답변 방식을 입력하세요.">${escapeHtml(s.defaultPrompt||'')}</textarea><div class="admin50-muted">/봇채팅 질문을 처리할 때 항상 앞부분에 적용됩니다. 비워두면 기본 프롬프트를 사용합니다. 새로운 코딩·게임 생성 요청도 기록에 없다는 이유로 거절하지 않도록 설정할 수 있습니다.</div></div>
-      <div class="admin50-muted">브라우저에서 Gemini API를 직접 호출하므로 API 키가 클라이언트에 노출될 수 있습니다. 실제 서비스라면 서버/Cloud Function 프록시를 권장합니다.</div>
-      <div class="modal-actions"><button class="btn btn-primary" id="a50GeminiSave" style="width:auto">설정 저장</button></div>
-    </div>
-    <div class="admin50-card"><h4>💳 토큰 과금 기준</h4><div class="admin50-muted">Gemini 총 토큰 사용량 기준: 0~1,500=1 · 1,501~3,500=2 · 3,501~7,000=3 · 7,001~12,000=4 · 12,001~20,000=6 · 20,001~35,000=8 · 35,001~60,000=12 · 60,001+=16토큰</div></div>
-    <div class="admin50-card"><h4>📊 봇 사용 통계</h4><div class="admin50-grid"><div class="admin50-stat"><div class="v">${Number(stats.questions||0)}</div><div class="k">질문</div></div><div class="admin50-stat"><div class="v">${Number(stats.answers||0)}</div><div class="k">답변</div></div><div class="admin50-stat"><div class="v">${Number(stats.lastPingMs||0)}ms</div><div class="k">최근 봇 핑</div></div><div class="admin50-stat"><div class="v">${Math.floor(Number(stats.lastLatencyMs||0)/60000).toString().padStart(2,'0')}분 ${Math.floor(Number(stats.lastLatencyMs||0)/1000%60).toString().padStart(2,'0')}초</div><div class="k">최근 답변 속도</div></div></div></div>`;
-  $('a50BotTypingSpeed').oninput=()=>{ $('a50BotTypingSpeedValue').textContent=`${Math.min(100,Math.max(.25,Number($('a50BotTypingSpeed').value)||BOT_DEFAULT_TYPING_SPEED)).toFixed(2).replace(/0+$/,'').replace(/\.$/,'')}x`; };
-  document.querySelectorAll('[data-botspeed]').forEach(b=>b.onclick=()=>{const v=Math.min(100,Math.max(.25,Number(b.dataset.botspeed)||1));$('a50BotTypingSpeed').value=v;$('a50BotTypingSpeedValue').textContent=`${v}x`;});
-  $('a50GeminiSave').onclick=async()=>{const key=$('a50GeminiKey').value.trim();const model=$('a50GeminiModel').value;const typingSpeed=Math.min(100,Math.max(.25,Number($('a50BotTypingSpeed').value)||BOT_DEFAULT_TYPING_SPEED));const defaultPrompt=$('a50BotDefaultPrompt').value.trim();await setDoc(doc(db,'settings','bot'),{apiKey:key,model,typingSpeed,defaultPrompt,updatedAt:serverTimestamp(),updatedBy:currentUser.uid},{merge:true});await auditAdmin('update-gemini-settings','settings/bot',`model=${model}, typingSpeed=${typingSpeed}x, prompt=${defaultPrompt?'custom':'default'}`);toast(`Gemini 설정을 저장했습니다. · 출력 속도 ${typingSpeed}x`);};
-}
-
-/* ----- system ----- */
+async function renderAdminBot(){ $('adminBody').innerHTML='<div class="admin50-card"><h4>AI 서버 설정 필요</h4><p>Supabase 이전 후 Gemini 비밀 키를 브라우저에 저장하는 기능을 제거했습니다. AI 답변은 인증과 사용량 검사를 수행하는 서버 함수를 연결한 뒤 사용할 수 있습니다.</p><p class="admin50-muted">일반 채팅, 기본 명령, 투표와 팀 기록은 사용할 수 있습니다. 기존 봇 토큰 잔액은 보존했습니다.</p></div>'; }
 async function renderAdminSystem(){
   const body=$('adminBody');
   const appSnap=await getDoc(doc(db,'settings','app'));
@@ -4374,31 +4178,39 @@ async function renderAdminSystem(){
   $('a50SysUnarchive').onclick=async()=>{if(!confirm('모든 채널의 보관 상태를 해제할까요?'))return;for(const ch of channels)await updateDoc(doc(db,'channels',ch.id),{archived:false});await auditAdmin('unarchive-all-channels');toast('완료했습니다.');};
   $('a50Health').onclick=a50HealthCheck;
   $('a50Backup').onclick=a50AdminBackup;
-  $('a50ProjectInfo').onclick=()=>a50Copy(`projectId=${firebaseConfig.projectId}\nauthDomain=${firebaseConfig.authDomain}\ndatabaseURL=${firebaseConfig.databaseURL}`);
+  $('a50ProjectInfo').onclick=()=>a50Copy(`projectId=${backendConfig.projectId}\nauthDomain=${backendConfig.authDomain}\ndatabaseURL=${backendConfig.databaseURL}`);
 }
 async function a50HealthCheck(){
   const box=$('a50HealthText');box.textContent='점검 중...';
   const results=[];
-  try{await getDoc(doc(db,'settings','dday'));results.push('Firestore 읽기 ✅');}catch(e){results.push('Firestore 읽기 ❌ '+e.code);}
-  try{await setDoc(doc(db,'admin_health',currentUser.uid),{checkedAt:serverTimestamp()},{merge:true});results.push('Firestore 관리자 쓰기 ✅');}catch(e){results.push('Firestore 관리자 쓰기 ❌ '+e.code);}
-  try{await set(ref(rtdb,'admin_health/'+currentUser.uid),{at:Date.now()});results.push('RTDB 관리자 쓰기 ✅');await remove(ref(rtdb,'admin_health/'+currentUser.uid));}catch(e){results.push('RTDB 관리자 쓰기 ❌ '+(e.code||e.message));}
+  try{await getDoc(doc(db,'settings','dday'));results.push('Supabase DB 읽기 ✅');}catch(e){results.push('Supabase DB 읽기 ❌ '+e.code);}
+  try{await setDoc(doc(db,'admin_health',currentUser.uid),{checkedAt:serverTimestamp()},{merge:true});results.push('Supabase DB 관리자 쓰기 ✅');}catch(e){results.push('Supabase DB 관리자 쓰기 ❌ '+e.code);}
+  try{await set(ref(rtdb,'admin_health/'+currentUser.uid),{at:Date.now()});results.push('실시간 데이터 쓰기 ✅');await remove(ref(rtdb,'admin_health/'+currentUser.uid));}catch(e){results.push('실시간 데이터 쓰기 ❌ '+(e.code||e.message));}
   box.innerHTML=results.map(x=>`<div>${escapeHtml(x)}</div>`).join('');
-  auditAdmin('firebase-health-check','',results.join(' | '));
+  auditAdmin('supabase-health-check','',results.join(' | '));
 }
 async function a50AdminBackup(){
-  const settings={};
-  for(const id of ['dday','app']){const s=await getDoc(doc(db,'settings',id));if(s.exists())settings[id]=s.data();}
-  const backup={exportedAt:new Date().toISOString(),projectId:firebaseConfig.projectId,categories,channels,users:a50VisibleUsers().map(u=>({...u,lastSeen:a50Date(u.lastSeen)})),settings};
-  a50Download(`nextbot_admin_backup_${Date.now()}.json`,JSON.stringify(backup,null,2),'application/json');
-  auditAdmin('admin-backup');
+ const roots=['users','categories','channels','settings','announcements','events','tests','strategies','missions','practices','records','stats','mvp_weeks','admin_logs'];
+ const pack={format:'nextbot-supabase-backup',version:1,exportedAt:new Date().toISOString(),projectId:backendConfig.projectId,snapshotConsistent:false,collections:{},messages:{},failed:[],credentialsIncluded:false};
+ toast('전체 백업을 만드는 중입니다. 잠시 기다려주세요.');
+ for(const root of roots){
+   try{const snap=await getDocs(collection(db,root));pack.collections[root]=snap.docs.map(d=>({id:d.id,...d.data()}));}
+   catch(e){pack.failed.push({path:root,error:e.message});}
+ }
+ for(const ch of pack.collections.channels||[]){
+   try{const snap=await getDocs(collection(db,'channels',ch.id,'messages'));pack.messages[ch.id]=snap.docs.map(d=>({id:d.id,...d.data()}));}
+   catch(e){pack.failed.push({path:'channels/'+ch.id+'/messages',error:e.message});}
+ }
+ pack.finishedAt=new Date().toISOString();pack.status=pack.failed.length?'partial':'complete-known-collections';
+ a50Download('nextbot_supabase_backup_'+Date.now()+'.json',JSON.stringify(pack,null,2),'application/json');
+ toast(pack.failed.length?'일부 항목의 백업에 실패했습니다. 파일의 failed 항목을 확인하세요.':'백업을 저장했습니다.');
 }
 
-/* ----- audit ----- */
 async function renderAdminAudit(){
   const body=$('adminBody');
   const s=await getDocs(query(collection(db,'admin_logs'),orderBy('createdAt','desc'),limit(100)));
   const logs=s.docs.map(d=>({id:d.id,...d.data()}));
-  body.innerHTML=`<div class="admin50-toolbar"><input id="a50AuditSearch" placeholder="행동/대상/관리자 검색"><button class="btn btn-sm" id="a50AuditExport">JSON</button><button class="btn btn-sm admin50-danger" id="a50AuditClear">최근 로그 삭제</button></div><div id="a50AuditList"></div>`;
+  body.innerHTML=`<div class="admin50-toolbar"><input id="a50AuditSearch" placeholder="행동/대상/관리자 검색"><button class="btn btn-sm" id="a50AuditExport">JSON</button><button class="btn btn-sm" id="a50AuditClear" disabled title="감사 로그는 보존됩니다">로그 보존 중</button></div><div id="a50AuditList"></div>`;
   const draw=()=>{const term=($('a50AuditSearch').value||'').toLowerCase();const arr=logs.filter(l=>!term||[l.action,l.target,l.adminNickname,l.detail].some(x=>String(x||'').toLowerCase().includes(term)));$('a50AuditList').innerHTML=arr.map(l=>`<div class="admin50-log"><b>${escapeHtml(l.action||'')}</b> · ${escapeHtml(l.adminNickname||'')} <span class="admin50-muted">${escapeHtml(a50Date(l.createdAt))}</span><div class="admin50-muted">${escapeHtml(l.target||'')} ${escapeHtml(l.detail||'')}</div></div>`).join('')||'<div class="empty">로그 없음</div>';};
   $('a50AuditSearch').addEventListener('input',draw);draw();
   $('a50AuditExport').onclick=()=>a50Download(`admin_logs_${Date.now()}.json`,JSON.stringify(logs.map(l=>({...l,createdAt:a50Date(l.createdAt)})),null,2),'application/json');
@@ -4446,6 +4258,77 @@ function closeModal(){ const bg=$('modalBg'); if(bg) bg.remove(); }
 $('drawerToggle').onclick=()=>{ $('sidebar').classList.add('open'); $('drawerScrim').classList.add('show'); };
 $('drawerScrim').onclick=closeDrawer;
 function closeDrawer(){ $('sidebar').classList.remove('open'); $('drawerScrim').classList.remove('show'); }
+
+// Restore calendar and D-day helpers missing from the previous single-file app.
+let ddaySettingUnsub=null;
+function paintDday(){
+ let text='D-•';
+ if(/^\d{4}-\d{2}-\d{2}$/.test(ddayTarget||'')){
+  const [y,m,d]=ddayTarget.split('-').map(Number),today=new Date();
+  const days=Math.round((Date.UTC(y,m-1,d)-Date.UTC(today.getFullYear(),today.getMonth(),today.getDate()))/86400000);
+  text=days===0?'D-DAY':days>0?'D-'+days:'D+'+Math.abs(days);
+ }
+ $('ddayNum').textContent=text;$('sbDday').textContent=text;
+}
+function loadDdaySetting(){
+ if(ddaySettingUnsub)ddaySettingUnsub();
+ $('ddayEditBtn').classList.toggle('hidden',!myDoc?.isAdmin);
+ ddaySettingUnsub=onSnapshot(teamSettingRef('dday'),snap=>{ddayTarget=snap.exists()?snap.data().date:null;paintDday();});
+}
+$('ddayEditBtn').onclick=()=>{
+ if(!myDoc?.isAdmin)return;
+ openModal('<h3>대회 날짜 설정</h3><div class="field"><label for="ddayDateInput">날짜</label><input type="date" id="ddayDateInput"></div><button class="btn btn-primary" id="saveDdayDate">저장</button>');
+ $('ddayDateInput').value=ddayTarget||'';
+ $('saveDdayDate').onclick=async()=>{
+  const date=$('ddayDateInput').value;if(!date)return;
+  try{await setDoc(teamSettingRef('dday'),{date},{merge:true});closeModal();toast('대회 날짜를 저장했습니다.');}
+  catch(e){toast(e.message);}
+ };
+};
+function showCalendar(){
+ currentChannelId=null;setActiveNav('navCalendar');
+ $('chanTitle').textContent='📅 캘린더';
+ for(const id of ['dashboardView','chatView','featureView'])$(id).classList.add('hidden');
+ $('calendarView').classList.remove('hidden');closeSearch();
+ for(const id of ['searchBtn','exportBtn','favChanBtn'])$(id).classList.add('hidden');
+ if(msgUnsub){msgUnsub();msgUnsub=null;}if(typingUnsub){typingUnsub();typingUnsub=null;}
+ if(!Number.isInteger(calYear)){const now=new Date();calYear=now.getFullYear();calMonth=now.getMonth();}
+ renderCalendarGrid();renderSidebarChannels();
+}
+function calendarKey(date){return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');}
+function renderCalendarGrid(){
+ if(!Number.isInteger(calYear))return;
+ $('calTitle').textContent=calYear+'년 '+(calMonth+1)+'월';
+ const first=new Date(calYear,calMonth,1),start=new Date(calYear,calMonth,1-first.getDay()),today=calendarKey(new Date());
+ let html=['일','월','화','수','목','금','토'].map(x=>'<div class="cal-dow">'+x+'</div>').join('');
+ for(let i=0;i<42;i++){
+  const date=new Date(start);date.setDate(start.getDate()+i);const key=calendarKey(date),items=eventsAll.filter(e=>e.date===key);
+  html+='<div class="cal-cell '+(date.getMonth()!==calMonth?'other ':'')+(key===today?'today':'')+'" data-cal-date="'+key+'" role="button" tabindex="0"><div class="cal-daynum">'+date.getDate()+'</div>'+
+    items.slice(0,3).map(e=>'<div class="cal-evt">'+escapeHtml(e.title||'일정')+'</div>').join('')+
+    (items.length>3?'<div class="cal-evt more">+'+(items.length-3)+'개</div>':'')+'</div>';
+ }
+ $('calGrid').innerHTML=html;
+ $('calGrid').querySelectorAll('[data-cal-date]').forEach(el=>{
+  const open=()=>openCalendarDay(el.dataset.calDate);el.onclick=open;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}};
+ });
+}
+function openCalendarDay(key){
+ const items=eventsAll.filter(e=>e.date===key),manage=canUseAdminCommands();
+ openModal('<h3>'+key+'</h3>'+items.map(e=>'<div class="day-evt-row"><span>'+escapeHtml(e.title||'일정')+'</span>'+(manage?'<button class="btn btn-sm day-evt-del" data-delete-event="'+escapeHtml(e.id)+'">삭제</button>':'')+'</div>').join('')+
+   (!items.length?'<div class="empty">등록된 일정이 없습니다.</div>':'')+(manage?'<button class="btn btn-sm" id="addCalendarEvent">+ 일정 추가</button>':''));
+ if(manage){
+  $('addCalendarEvent').onclick=()=>{a50EditEvent();$('a50EvDate').value=key;};
+  document.querySelectorAll('[data-delete-event]').forEach(btn=>btn.onclick=async()=>{if(!confirm('이 일정을 삭제할까요?'))return;try{await deleteDoc(doc(db,'events',btn.dataset.deleteEvent));closeModal();}catch(e){toast(e.message);}});
+ }
+}
+$('calPrev').onclick=()=>{const date=new Date(calYear,calMonth-1,1);calYear=date.getFullYear();calMonth=date.getMonth();renderCalendarGrid();};
+$('calNext').onclick=()=>{const date=new Date(calYear,calMonth+1,1);calYear=date.getFullYear();calMonth=date.getMonth();renderCalendarGrid();};
+$('calToday').onclick=()=>{const date=new Date();calYear=date.getFullYear();calMonth=date.getMonth();renderCalendarGrid();};
+function checkEventDdayNotifications(){
+ if(!currentUser)return;const today=calendarKey(new Date()),seen=storeGet('calendarNotified',{});
+ for(const event of eventsAll.filter(e=>e.date===today)){const key=today+':'+event.id;if(seen[key])continue;toast('📅 오늘 일정: '+String(event.title||'일정'));seen[key]=true;}
+ const recent=Object.fromEntries(Object.entries(seen).filter(([key])=>key.startsWith(today+':')));storeSet('calendarNotified',recent);
+}
 </script>
 </body>
 </html>
