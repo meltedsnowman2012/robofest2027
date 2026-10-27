@@ -14,6 +14,8 @@ create table if not exists nextbot_private.identities(
   auth_id uuid primary key references auth.users(id) on delete cascade,
   legacy_uid text unique not null
 );
+alter table nextbot_private.identities enable row level security;
+revoke all on table nextbot_private.identities from public, anon, authenticated;
 alter table public.nb_records enable row level security;
 revoke all on public.nb_records from public, anon, authenticated;
 grant select on public.nb_records to authenticated;
@@ -79,8 +81,18 @@ begin
  return true;
 end
 $f$;
-drop policy if exists nb_read on public.nb_records;
-create policy nb_read on public.nb_records for select to authenticated using(public.nb_can_read(path,data));
+do $nb_policy$
+begin
+  if exists(select 1 from pg_policies where schemaname='public' and tablename='nb_records' and policyname='nb_read') then
+    if exists(select 1 from pg_policies where schemaname='public' and tablename='nb_records' and policyname='nb_read' and cmd<>'SELECT') then
+      raise exception '기존 nb_read 정책의 종류가 다릅니다. 자동 변경하지 않았습니다.';
+    end if;
+    alter policy nb_read on public.nb_records to authenticated using(public.nb_can_read(path,data));
+  else
+    create policy nb_read on public.nb_records for select to authenticated using(public.nb_can_read(path,data));
+  end if;
+end
+$nb_policy$;
 
 create or replace function public.nb_identity() returns jsonb
 language plpgsql security definer set search_path='' as $f$
