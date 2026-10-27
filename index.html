@@ -2,12 +2,12 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0c0d0f">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>NEXTBOT ULTRA | ROBOFEST 2027</title>
+<title>NEXTBOT HYPER | ROBOFEST 2027</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -612,7 +612,7 @@
     .tool-grid{grid-template-columns:1fr;}
   }
 
-  /* ---------- NEXTBOT ULTRA: dashboard + focus ---------- */
+  /* ---------- NEXTBOT HYPER: dashboard + focus ---------- */
   .ultra-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:0 0 16px;}
   .ultra-stat{border:1px solid var(--border-soft);background:var(--panel);border-radius:10px;padding:13px 14px;min-width:0;}
   .ultra-stat .us-label{font-size:10.5px;color:var(--text-faint);font-weight:700;letter-spacing:.03em;}
@@ -696,11 +696,12 @@
 }
 
 </style>
+<link rel="stylesheet" href="./hyper.css">
 </head>
 <body>
 
 <!-- ============ AUTH VIEW ============ -->
-<div id="authView">
+<div id="authView"><section class="auth-intro" aria-label="NEXTBOT 소개"><div class="hyper-eyebrow">NEXTBOT HYPER / ROBOFEST 2027</div><h2>함께 만들고,<br><em>한 단계 더 앞으로.</em></h2><p>팀의 대화, 대회 준비, 매일의 작업을 한곳에서.<br>Grok과 함께 아이디어를 다음 실행으로 바꾸세요.</p><div class="auth-benefits"><div class="auth-benefit"><span>✦</span><span>코딩부터 전략까지, Grok 작업 공간</span></div><div class="auth-benefit"><span>▦</span><span>흩어진 할 일을 정리하는 작업 보드</span></div><div class="auth-benefit"><span>⌕</span><span>팀 대화와 자료를 빠르게 찾는 검색</span></div></div></section>
   <div class="auth-box">
     <div class="auth-brand">
       <div class="mark">N</div>
@@ -711,25 +712,25 @@
     </div>
 
     <div id="loginForm">
-      <div class="auth-team-hint" role="note">Supabase 이전 후 처음 이용하는 기존 회원은 기존 이메일로 한 번 가입하고 메일 인증을 완료하세요. 닉네임과 역할은 기존 정보로 연결됩니다.</div><h1 class="auth-h">팀에 로그인하세요</h1>
-      <p class="auth-p">NEXTBOT 계정으로 로그인합니다.</p>
+      <h1 class="auth-h">팀에 로그인하세요</h1>
+      <p class="auth-p">다음 아이디어가 기다리고 있어요.</p>
       <div class="auth-msg" id="loginMsg"></div>
-      <div class="field"><label>이메일</label><input type="email" id="loginEmail" autocomplete="username"></div>
+      <div class="field"><label for="loginEmail">이메일</label><input type="email" id="loginEmail" autocomplete="username"></div>
       <div class="auth-team-hint">일반 이메일(Gmail, Naver 등)은 ROBOFEST로, @zeropoint.co.kr은 CCE로 자동 연결됩니다.</div>
-      <div class="field"><label>비밀번호</label><input type="password" id="loginPw" autocomplete="current-password"></div>
+      <div class="field"><label for="loginPw">비밀번호</label><input type="password" id="loginPw" autocomplete="current-password"></div>
       <div class="auth-forgot"><button id="forgotBtn" type="button">비밀번호를 잊으셨나요?</button></div>
       <button class="btn btn-primary" id="loginBtn">로그인</button>
-      <div class="auth-switch">아직 계정이 없나요? <button id="toSignup">회원가입</button></div>
+      <div class="auth-switch">아직 계정이 없나요? <button id="toSignup">회원가입</button></div><details class="auth-migration"><summary>이전 회원의 첫 로그인 안내</summary><p>새 로그인 계정이 없다면 기존 이메일로 가입하고 메일 인증을 완료하세요. 관리자가 계정을 만들어준 경우 새 비밀번호로 바로 로그인합니다.</p></details>
     </div>
 
     <div id="signupForm" class="hidden">
       <h1 class="auth-h">NEXTBOT 팀 합류하기</h1>
       <p class="auth-p">팀원 계정을 생성합니다.</p>
       <div class="auth-msg" id="signupMsg"></div>
-      <div class="field"><label>닉네임</label><input type="text" id="suNick" placeholder="예: 임휘승"></div>
-      <div class="field"><label>이메일</label><input type="email" id="suEmail" autocomplete="username"></div>
+      <div class="field"><label for="suNick">닉네임</label><input type="text" id="suNick" placeholder="예: 임휘승"></div>
+      <div class="field"><label for="suEmail">이메일</label><input type="email" id="suEmail" autocomplete="username"></div>
       <div class="auth-team-hint">@zeropoint.co.kr → CCE / 그 외 일반 이메일 → ROBOFEST</div>
-      <div class="field"><label>비밀번호</label><input type="password" id="suPw" autocomplete="new-password" placeholder="6자 이상"></div>
+      <div class="field"><label for="suPw">비밀번호</label><input type="password" id="suPw" autocomplete="new-password" placeholder="6자 이상"></div>
       <button class="btn btn-primary" id="signupBtn">회원가입</button>
       <div class="auth-switch">이미 계정이 있나요? <button id="toLogin">로그인</button></div>
     </div>
@@ -759,7 +760,7 @@
         <button class="team-switch-btn" data-team-switch="cce" aria-pressed="false">🏢 CCE</button>
       </div>
     </div>
-    <div class="sb-channels" id="sbChannels"></div>
+    <div class="sb-filter-wrap"><input type="search" id="channelFilter" aria-label="채널 이름 필터" placeholder="⌕ 채널 빠르게 찾기"></div><div class="sb-channels" id="sbChannels"></div>
     <div class="sb-add-cat-btn hidden" id="addCatBtn">+ 카테고리 추가</div>
 
     <div class="sb-user">
@@ -787,7 +788,7 @@
         <button class="icon-btn hidden" id="searchBtn" title="메시지 검색">🔍</button>
         <button class="icon-btn hidden" id="exportBtn" title="채팅 내보내기">💾</button>
         <button class="icon-btn hidden" id="favChanBtn" title="현재 채널 즐겨찾기">☆</button>
-        <button class="icon-btn" id="toolsBtn" title="NEXTBOT 도구/설정" aria-label="NEXTBOT 도구 및 접근성 설정">⌘</button><div id="botTokenPill" class="bot-token-pill" title="AI 봇 토큰"><span>🤖</span><b id="botTokenCount">-</b></div>
+        <button class="icon-btn" id="toolsBtn" title="NEXTBOT 도구/설정" aria-label="NEXTBOT 도구 및 접근성 설정">⌘</button><div id="botTokenPill" class="bot-token-pill" title="기존 봇 토큰 잔액 · Grok 사용 횟수와 별개"><span>🤖</span><b id="botTokenCount">-</b></div>
         <button class="icon-btn" id="notifBtn">🔔<span class="badge-count hidden" id="notifCount">0</span></button>
         <button class="icon-btn" id="memberBtn" title="팀원 목록">👥</button>
       </div>
@@ -832,7 +833,7 @@
 
     <div id="chatView" class="chat-view hidden">
       <div class="pin-bar hidden" id="pinBar"></div>
-      <div class="msg-list" id="msgList"></div>
+      <div class="chat-utility"><button class="btn btn-sm" id="loadOlderBtn">↑ 이전 대화 더 보기</button><span class="chat-count" id="chatCount">불러오는 중…</span><div class="chat-filters" id="chatFilters"><button class="chat-filter" data-chat-filter="all" aria-pressed="true">전체</button><button class="chat-filter" data-chat-filter="mine" aria-pressed="false">내 메시지</button><button class="chat-filter" data-chat-filter="mentions" aria-pressed="false">내 멘션</button><button class="chat-filter" data-chat-filter="files" aria-pressed="false">파일</button><button class="chat-filter" data-chat-filter="polls" aria-pressed="false">투표</button><button class="chat-filter" data-chat-filter="pins" aria-pressed="false">고정</button></div></div><div class="msg-list" id="msgList"></div>
       <div class="typing-line" id="typingLine"></div>
       <div class="composer-wrap">
         <div class="reply-preview hidden" id="replyPreview"></div>
@@ -846,7 +847,7 @@
           <button class="poll-btn" id="pollBtn" title="투표 만들기" aria-label="투표 만들기">📊</button>
           <textarea id="msgInput" rows="1" aria-label="메시지 입력" placeholder="메시지 보내기... (@ 멘션, # 채널)"></textarea>
           <button class="send-btn" id="sendBtn" disabled aria-label="메시지 보내기">➤</button>
-        </div>
+        </div><div class="composer-hint"><span id="composerStatus" role="status">Enter 전송 · Shift+Enter 줄바꿈 · 초안 자동 저장</span><button id="composerHelp">✦ Grok에게 도움받기</button></div>
       </div>
     </div>
 
@@ -889,8 +890,10 @@ import {
  signInWithEmailAndPassword,signOut,sendPasswordResetEmail,updateProfile,setPersistence,browserLocalPersistence,
  doc,setDoc,getDoc,updateDoc,deleteDoc,collection,addDoc,query,orderBy,onSnapshot,serverTimestamp,where,limit,getDocs,
  arrayUnion,arrayRemove,runTransaction,increment,ref,set,onValue,onDisconnect,remove,push,rtdbTimestamp,off,
- signUpMember,completePasswordReset
+ signUpMember,completePasswordReset,askGrok
 } from "./supabase-bridge.mjs";
+
+import { initHyper } from "./hyper.mjs";
 
 const backendConfig={
  url:"https://lyxkmvaweoeqayvjteof.supabase.co",
@@ -990,33 +993,6 @@ const BOT_AVATAR = "data:image/svg+xml;utf8," + encodeURIComponent(
 const BOT_USER = { uid:"BOT", nickname:"NEXTBOT", roles:["bot"], photoURL:BOT_AVATAR, isBot:true };
 const ADMIN_COMMAND_NAMES = ["/공지","/일정","/채널생성"];
 const BOT_CHAT_COMMAND = "/봇채팅";
-const BOT_CHAT_MIN_COST = 1;
-// Gemini 사용량(입력+출력 토큰)에 따라 실제 차감량을 결정합니다.
-// 짧은 질문은 1토큰, 긴 컨텍스트/긴 답변은 더 많은 토큰을 사용합니다.
-const BOT_CHAT_COST_TIERS = [
-  { max: 1500, cost: 1 },
-  { max: 3500, cost: 2 },
-  { max: 7000, cost: 3 },
-  { max: 12000, cost: 4 },
-  { max: 20000, cost: 6 },
-  { max: 35000, cost: 8 },
-  { max: 60000, cost: 12 },
-  { max: Infinity, cost: 16 }
-];
-function botCostFromUsage(usage){
-  const total=Math.max(0,Number(usage?.totalTokenCount||0));
-  if(!total)return BOT_CHAT_MIN_COST;
-  return (BOT_CHAT_COST_TIERS.find(t=>total<=t.max)||BOT_CHAT_COST_TIERS[BOT_CHAT_COST_TIERS.length-1]).cost;
-}
-const BOT_DEFAULT_MODEL = "gemini-3.6-flash";
-const BOT_DEFAULT_TYPING_SPEED = 1;
-const BOT_TYPING_SPEED_OPTIONS = [0.25,0.5,0.75,1,1.5,2,3,5,10,20,50,100];
-const BOT_MODEL_OPTIONS = ["gemini-3.6-flash","gemini-3.5-flash","gemini-3.5-flash-lite","gemini-2.5-flash","gemini-2.5-pro"];
-const BOT_LEGACY_MODEL_FALLBACKS = {
-  "gemini-2.0-flash":"gemini-3.6-flash",
-  "gemini-2.0-flash-lite":"gemini-3.5-flash-lite",
-  "gemini-2.0-flash-exp":"gemini-3.6-flash"
-};
 const HELP_COMMANDS = [
   { cmd:"/주사위 [숫자]", desc:"1~숫자(기본 6) 사이 주사위를 굴려요." },
   { cmd:"/동전", desc:"동전을 던져 앞면/뒷면을 알려줘요." },
@@ -1027,13 +1003,12 @@ const HELP_COMMANDS = [
   { cmd:"/디데이", desc:"대회까지 남은 날짜를 알려줘요." },
   { cmd:"/순위", desc:"이번 주 채팅 활동 랭킹(진행 중)을 보여줘요." },
   { cmd:"/help 또는 /도움말", desc:"이 명령어 목록을 보여줘요." },
-  { cmd:"/봇채팅 질문", desc:"전체 채팅 기록을 참고해 Gemini AI에게 질문해요. Gemini 사용량에 따라 1~16토큰을 사용합니다." },
+  { cmd:"/봇채팅 질문", desc:"Grok 개인 작업창을 열어요. 참고할 채널을 선택하고 직접 질문할 수 있습니다." },
   { cmd:"/봇도움말", desc:"AI 봇 관련 명령어와 토큰 사용법을 보여줘요." },
-  { cmd:"/봇채팅 질문", desc:"NEXTBOT이 필요한 경우 팀원·채널·메시지·기록 조회 및 지정 채널 게시 같은 도구를 사용할 수 있습니다." },
   { cmd:"/내토큰", desc:"현재 보유한 AI 봇 토큰을 확인해요." },
   { cmd:"/내상태", desc:"내 접속 상태·타임아웃·AI 봇 토큰을 확인해요." },
   { cmd:"/핑", desc:"NEXTBOT 응답 테스트와 현재 접속 상태를 확인해요." },
-  { cmd:"/회의요약", desc:"전체 채팅 기록을 바탕으로 회의 내용을 요약해요. 토큰 1개를 사용합니다." },
+  { cmd:"/회의요약", desc:"현재 채널을 선택한 Grok 회의 요약 작업창을 엽니다." },
 ];
 const HELP_ADMIN_COMMANDS = [
   { cmd:"/공지 제목|내용", desc:"공지를 등록하고 봇이 알려요. (관리자)" },
@@ -1097,7 +1072,7 @@ const NEXTBOT_EXTRA_COMMANDS = [
 HELP_COMMANDS.push(...NEXTBOT_EXTRA_COMMANDS);
 
 
-/* ---------------- NEXTBOT ULTRA: 추가 실사용 명령어 ---------------- */
+/* ---------------- NEXTBOT HYPER: 추가 실사용 명령어 ---------------- */
 const NEXTBOT_ULTRA_COMMANDS = [
   {cmd:"/상위3",desc:"이번 주 MVP TOP3를 바로 보여줘요."},
   {cmd:"/메시지순위 [1~20]",desc:"메시지 작성 수 기준 순위를 보여줘요."},
@@ -1388,6 +1363,7 @@ function stopTeamDataListeners(){
   if(typingUnsub){typingUnsub();typingUnsub=null;}
 }
 function exitApp(){
+  $('msgList').removeAttribute('data-channel');$('msgInput').value='';pendingAttachments=[];replyTarget=null;$('channelFilter').value='';
   $('authView').style.display='flex';$('appView').classList.remove('show');
   stopTeamDataListeners();botModeOn=false;mvpCycleChecked=false;
 }
@@ -1402,7 +1378,7 @@ function updateTeamSwitcherUI(){
   const def=TEAM_DEFS[activeTeam]||TEAM_DEFS[TEAM_ROBOFEST];
   if($('teamDashTag'))$('teamDashTag').textContent=def.dashboardTag;
   if($('teamDashTitle'))$('teamDashTitle').textContent=def.dashboardTitle;
-  document.title=`NEXTBOT ULTRA | ${def.label}`;
+  document.title=`NEXTBOT HYPER | ${def.label}`;
 }
 async function switchActiveTeam(team){
   if(!isTeamLeadAccount()){toast('워크스페이스 전환은 관리자만 사용할 수 있습니다.');return;}
@@ -1652,6 +1628,7 @@ function renderSidebarChannels(){
       </div>
     </div>`;
   }).join('');
+  applySidebarFilter();
   const addCatBtn=$('addCatBtn'); if(addCatBtn)addCatBtn.classList.toggle('hidden',!myDoc?.isAdmin);
   box.querySelectorAll('[data-toggle]').forEach(el=>el.onclick=()=>{const id=el.getAttribute('data-toggle');collapsedCats[id]=!collapsedCats[id];renderSidebarChannels();});
   box.querySelectorAll('[data-chan]').forEach(el=>el.onclick=()=>{const cid=el.getAttribute('data-chan');const ch=channels.find(c=>c.id===cid);if(!ch||!canSeeChannel(ch))return;openChannel(cid,ch.name,categories.find(c=>c.id===ch.categoryId)?.name||'');closeDrawer();});
@@ -1721,8 +1698,6 @@ function setActiveNav(id){
 function openChannel(chanId, chanName, catName){
   const chObj = channels.find(c=>c.id===chanId);
   if(chObj && !canSeeChannel(chObj)){ toast('이 채널에 접근할 권한이 없습니다.'); showDashboard(); return; }
-  // 채널을 바꾸면 이전 채널의 봇 스트리밍 UI는 숨깁니다. 실제 Gemini 작업은 중단하지 않습니다.
-  removeBotStreamingBubble();
   currentChannelId=chanId; currentChannelName=chanName;
   $('favChanBtn').classList.remove('hidden'); updateFavoriteChannelButton();
   document.querySelectorAll('.sb-nav-item').forEach(e=>e.classList.remove('active'));
@@ -1758,18 +1733,18 @@ function channelHasUnread(ch){
 }
 
 /* ---------------- Chat ---------------- */
-function openChatChannel(chanId){
+function openChatChannel(chanId,messageLimit=200,preserveScroll=false){
+  const previousHeight=$('msgList').scrollHeight,previousTop=$('msgList').scrollTop;
+  const sameChannel=$('msgList').dataset.channel===chanId;
+  $('msgList').dataset.channel=chanId;$('msgList').dataset.limit=String(messageLimit);
   if(msgUnsub) msgUnsub();
   if(typingUnsub) typingUnsub();
   markChannelRead(chanId);
-  replyTarget=null; renderReplyPreview();
-  pendingAttachments=[]; renderAttachPreview();
-  restoreChannelDraft(chanId);
-  closeSearch();
+  if(!sameChannel){$('composerStatus').textContent='Enter 전송 · Shift+Enter 줄바꿈 · 초안 자동 저장';replyTarget=null;renderReplyPreview();pendingAttachments=[];renderAttachPreview();restoreChannelDraft(chanId);closeSearch();chatFilter='all';$('chatFilters').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.chatFilter==='all')));}
   $('searchBtn').classList.remove('hidden');
   $('exportBtn').classList.remove('hidden');
-  $('msgList').innerHTML='';
-  const q = query(collection(db,'channels',chanId,'messages'), orderBy('createdAt','desc'), limit(200));
+  $('msgList').innerHTML='';$('loadOlderBtn').disabled=true;$('loadOlderBtn').textContent='불러오는 중…';
+  const q = query(collection(db,'channels',chanId,'messages'), orderBy('createdAt','desc'), limit(messageLimit));
   msgUnsub = onSnapshot(q, (snap)=>{
     const list=$('msgList');
     const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 120;
@@ -1780,10 +1755,11 @@ function openChatChannel(chanId){
       snap.docs.slice().reverse().forEach(d=>{const m=d.data();if(teamResourceMatches(m) || (activeTeam===TEAM_CCE && !m.team && String(chanId).startsWith('cce-')))renderMessage(d.id,m);});
       if(!list.children.length)list.innerHTML='<div class="empty-chan"><div class="big">💬</div><div>현재 워크스페이스의 메시지가 없습니다.</div></div>';
     }
-    if(nearBottom) list.scrollTop=list.scrollHeight;
+    if(preserveScroll){list.scrollTop=previousTop+list.scrollHeight-previousHeight;preserveScroll=false;}else if(nearBottom)list.scrollTop=list.scrollHeight;
+    $('loadOlderBtn').disabled=snap.size<messageLimit||messageLimit>=2000;$('loadOlderBtn').textContent=snap.size<messageLimit?'이전 대화를 모두 불러왔습니다':messageLimit>=2000?'최근 2,000개 표시 중':'↑ 이전 대화 200개 더 보기';
     renderPinBar(snap);
     applySearchFilter();
-  });
+  },error=>{$('loadOlderBtn').disabled=false;$('loadOlderBtn').textContent='다시 불러오기';toast(error.message||'대화를 불러오지 못했습니다.');});
   // typing indicator
   const typeRef = ref(rtdb,'typing/'+chanId);
   onValue(typeRef, (snap)=>{
@@ -1823,14 +1799,29 @@ function closeSearch(){
 }
 $('searchInput').addEventListener('input', applySearchFilter);
 function applySearchFilter(){
-  const term=($('searchInput').value||'').trim().toLowerCase();
-  document.querySelectorAll('#msgList .msg-row').forEach(row=>{
-    const txt=(row.querySelector('[data-text]')?.textContent||'').toLowerCase();
-    const nick=(row.querySelector('.msg-nick')?.textContent||'').toLowerCase();
-    const match = !term || txt.includes(term) || nick.includes(term);
-    row.classList.toggle('search-hide', !match);
-  });
+ const term=($('searchInput').value||'').trim().toLowerCase();let visible=0,total=0;
+ document.querySelectorAll('#msgList .msg-row').forEach(row=>{
+  const text=row.textContent.toLowerCase(),kind=row.dataset.kind;
+  const mode=chatFilter==='all'||(chatFilter==='mine'&&row.dataset.mine==='true')||(chatFilter==='files'&&row.dataset.files==='true')||(chatFilter==='mentions'&&row.dataset.mentioned==='true')||(chatFilter==='pins'&&row.dataset.pinned==='true')||(chatFilter==='polls'&&kind==='poll');
+  const match=mode&&(!term||text.includes(term));row.classList.toggle('search-hide',!match);total++;if(match)visible++;
+ });
+ if($('chatCount'))$('chatCount').textContent=visible+'/'+total+'개 표시';
 }
+let chatFilter='all';
+$('chatFilters').querySelectorAll('[data-chat-filter]').forEach(b=>b.onclick=()=>{
+ chatFilter=b.dataset.chatFilter;$('chatFilters').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));applySearchFilter();
+});
+$('channelFilter').addEventListener('input',applySidebarFilter);
+function applySidebarFilter(){
+ const term=$('channelFilter').value.trim().toLowerCase();
+ $('sbChannels').querySelectorAll('.sb-cat').forEach(cat=>{
+  let shown=0;cat.querySelectorAll('.sb-chan').forEach(row=>{const ch=channels.find(c=>c.id===row.dataset.chan);const match=!term||(ch?.name||'').toLowerCase().includes(term);row.classList.toggle('search-empty',!match);if(match)shown++;});
+  cat.classList.toggle('search-empty',!!term&&!shown);cat.querySelector('.sb-chan-list')?.classList.toggle('force-open',!!term);
+ });
+}
+$('loadOlderBtn').onclick=()=>{if(!currentChannelId)return;openChatChannel(currentChannelId,Math.min(2000,Number($('msgList').dataset.limit||200)+200),true);};
+$('composerHelp').onclick=()=>hyper.open('ai',{channelId:currentChannelId||''});
+
 /* ---------------- Chat export / backup ---------------- */
 $('exportBtn').onclick=exportChannelChat;
 async function exportChannelChat(){
@@ -1870,7 +1861,7 @@ function renderMessage(id, m){
   const roleTxt = rolesLabel(u.roles);
   const mine = m.userId===currentUser.uid;
   const row=document.createElement('div');
-  row.className='msg-row'; row.dataset.id=id;
+  row.className='msg-row'; row.dataset.id=id;row.dataset.kind=m.type||'message';row.dataset.mine=String(m.userId===currentUser.uid);row.dataset.files=String(!!m.attachments?.length);row.dataset.pinned=String(!!m.pinned);row.dataset.mentioned=String((m.mentions||[]).some(x=>x==='user:'+currentUser.uid||x==='전체'||(myDoc.roles||[]).some(r=>MENTION_ROLE_TOKENS[x]===r)));
   let replyHtml='';
   if(m.replyTo){
     replyHtml=`<div class="msg-reply-ref" data-jump="${escapeHtml(m.replyTo.id||'')}">↩ ${escapeHtml(m.replyTo.nickname||'')}: ${escapeHtml((m.replyTo.snippet||'').slice(0,60))}</div>`;
@@ -1992,7 +1983,7 @@ async function toggleReaction(msgId, emoji){
     const authorUid=msg.userId;
     if(authorUid && authorUid!==currentUser.uid && authorUid!=='BOT' && !msg.isBot){
       try{ await bumpStat('reactCount', authorUid, has ? -1 : 1); }
-      catch(e){ toast('리액션은 반영됐지만 MVP 통계 기록에 실패했어요. Firebase 권한을 확인해주세요.'); }
+      catch(e){ toast('리액션은 반영됐지만 MVP 통계 기록에 실패했어요. Supabase 권한을 확인해주세요.'); }
     }
   }catch(e){
     console.error('reaction update error', e);
@@ -2045,7 +2036,7 @@ const msgInput=$('msgInput');
 msgInput.addEventListener('input', ()=>{
   saveChannelDraft();
   msgInput.style.height='auto'; msgInput.style.height=Math.min(msgInput.scrollHeight,140)+'px';
-  $('sendBtn').disabled = !msgInput.value.trim() && !pendingAttachments.length;
+  $('sendBtn').disabled = messageSending||(!msgInput.value.trim() && !pendingAttachments.length);
   handleMentionPopup();
   handleChannelPopup();
   handleSlashPopup();
@@ -2089,7 +2080,7 @@ function refreshUserAccessUI(){
     composer.setAttribute('aria-label',timed?'타임아웃으로 잠긴 메시지 입력':'메시지 입력');
   }
   buttons.forEach(b=>{if(b){b.disabled=timed;b.title=timed?'타임아웃 중에는 사용할 수 없습니다.':b.title;}});
-  if($('sendBtn')) $('sendBtn').disabled=timed || (!msgInput.value.trim()&&!pendingAttachments.length);
+  if($('sendBtn')) $('sendBtn').disabled=messageSending||timed || (!msgInput.value.trim()&&!pendingAttachments.length);
   let notice=$('accessNotice');
   if(timed){
     if(!notice){notice=document.createElement('div');notice.id='accessNotice';notice.className='access-notice timeout';$('chatView')?.insertBefore(notice,$('chatView').querySelector('.composer-wrap'));}
@@ -2097,52 +2088,51 @@ function refreshUserAccessUI(){
   }else if(notice){notice.remove();}
 }
 
+let messageSending=false;
 async function sendMessage(){
-  refreshUserAccessUI();
-  if(isUserTimedOut()){ toast(`⏳ 타임아웃 상태입니다. 남은 시간: ${timeoutRemainingText()}`); return; }
-  const chNow=channels.find(c=>c.id===currentChannelId);
-  if(!canSeeChannel(chNow)){toast('이 채널은 현재 워크스페이스에서 사용할 수 없습니다.');return;}
-  if(chNow?.locked&&!myDoc?.isAdmin&&!isTeamLeadAccount()){toast('이 채널은 관리자가 쓰기 잠금했습니다.');return;}
-  const text=msgInput.value.trim();
-  if((!text && !pendingAttachments.length) || !currentChannelId) return;
-  if(text.startsWith('/') && !pendingAttachments.length){
-    msgInput.value=''; msgInput.style.height='auto'; clearChannelDraft(currentChannelId); $('sendBtn').disabled=true;
-    replyTarget=null; renderReplyPreview();
-    if(/^\/봇채팅(?:\s+|$)/.test(text)){
-      await handleBotChatCommand(text.slice(BOT_CHAT_COMMAND.length).trim());
-    }else{
-      await handleSlashCommand(text);
-    }
-    setTypingState(false);
-    return;
+ if(messageSending)return;
+ refreshUserAccessUI();
+ if(isUserTimedOut()){toast('타임아웃이 끝난 뒤 전송할 수 있습니다.');return;}
+ const channel=channels.find(c=>c.id===currentChannelId);
+ if(!canSeeChannel(channel)){toast('이 채널에 접근할 수 없습니다.');return;}
+ if(channel.locked&&!myDoc?.isAdmin&&!isTeamLeadAccount()){toast('관리자가 쓰기를 잠근 채널입니다.');return;}
+ const originalInput=msgInput.value,text=originalInput.trim();
+ if((!text&&!pendingAttachments.length)||!currentChannelId)return;
+ if(!navigator.onLine){toast('오프라인입니다. 초안을 보관했습니다. 연결 후 다시 전송하세요.');saveChannelDraft();return;}
+ if(text.startsWith('/')&&!pendingAttachments.length){
+  msgInput.value='';msgInput.style.height='auto';clearChannelDraft(currentChannelId);$('sendBtn').disabled=true;
+  replyTarget=null;renderReplyPreview();
+  if(/^\/봇채팅(?:\s+|$)/.test(text))await handleBotChatCommand(text.slice(BOT_CHAT_COMMAND.length).trim());
+  else await handleSlashCommand(text);
+  setTypingState(false);return;
+ }
+ const sentChannelId=currentChannelId,sentUid=currentUser.uid,sentReply=replyTarget,sentFiles=pendingAttachments.slice();
+ const notificationContext={channelId:sentChannelId,channelName:currentChannelName,uid:sentUid,nickname:myDoc.nickname,users:{...usersMap}};
+ const payload={userId:sentUid,content:text,mentions:extractMentions(text),team:activeTeam,createdAt:serverTimestamp()};
+ if(botModeOn&&canUseAdminCommands())payload.isBot=true;
+ if(sentReply)payload.replyTo=sentReply;
+ if(sentFiles.length)payload.attachments=sentFiles;
+ messageSending=true;$('sendBtn').disabled=true;$('composerStatus').textContent='전송 중…';
+ try{
+  await addDoc(collection(db,'channels',sentChannelId,'messages'),payload);
+  void pushMentionNotifications(payload.mentions,text,notificationContext).catch(()=>toast('메시지는 전송했지만 일부 멘션 알림을 보내지 못했습니다.'));
+  if(currentUser?.uid===sentUid){
+   const drafts=storeGet('drafts',{});
+   if(drafts[sentChannelId]===originalInput){delete drafts[sentChannelId];storeSet('drafts',drafts);}
+   if(currentChannelId===sentChannelId){
+    if(msgInput.value===originalInput){msgInput.value='';msgInput.style.height='auto';}
+    if(replyTarget===sentReply){replyTarget=null;renderReplyPreview();}
+    pendingAttachments=pendingAttachments.filter(x=>!sentFiles.includes(x));renderAttachPreview();saveChannelDraft();
+   }
+   $('composerStatus').textContent='전송 완료';
   }
-  $('sendBtn').disabled=true;
-  const payload={
-    userId:currentUser.uid,content:text,mentions:extractMentions(text),
-    team:activeTeam,createdAt:serverTimestamp()
-  };
-  if(botModeOn && canUseAdminCommands()){
-    payload.isBot = true;
-  }
-  if(replyTarget) payload.replyTo = replyTarget;
-  if(pendingAttachments.length) payload.attachments = pendingAttachments.slice();
-  try{
-    await addDoc(collection(db,'channels',currentChannelId,'messages'), payload);
-    // Channel activity is updated atomically by the server.
-    pushMentionNotifications(payload.mentions, text);
-    // /순위를 바로 실행해도 방금 보낸 메시지가 포함되도록 통계 기록을 기다립니다.
-    // 통계 권한 설정이 잘못돼도 이미 성공한 메시지 전송 자체를 실패로 처리하지는 않습니다.
-    try{ await bumpStat('msgCount', currentUser.uid); }
-    catch(e){ toast('메시지는 전송됐지만 MVP 통계 기록에 실패했어요. Firebase 권한을 확인해주세요.'); }
-    msgInput.value=''; msgInput.style.height='auto'; clearChannelDraft(currentChannelId);
-    replyTarget=null; renderReplyPreview();
-    pendingAttachments=[]; renderAttachPreview();
-  }catch(e){
-    console.error('send message error', e);
-    toast(e && e.code==='permission-denied' ? '이 채널에 메시지를 보낼 권한이 없어요. (채널 설정을 확인해주세요)' : (e.message||'메시지 전송에 실패했어요. 다시 시도해주세요.'));
-    $('sendBtn').disabled = !msgInput.value.trim() && !pendingAttachments.length;
-  }
-  setTypingState(false);
+ }catch(e){
+  toast(e.message||'전송하지 못했습니다. 초안은 유지됩니다.');
+  if(currentUser?.uid===sentUid)$('composerStatus').textContent='전송 실패 · 다시 시도 가능';
+ }finally{
+  messageSending=false;refreshUserAccessUI();
+  if(currentUser&&currentChannelId===sentChannelId)setTypingState(false);
+ }
 }
 
 /* ---------------- Bot: 명령어 & 봇 모드 ---------------- */
@@ -2173,258 +2163,9 @@ function postBotReply(text){
   return sendBotMessage(target, text);
 }
 
-/* ---------------- Gemini Bot Chat ---------------- */
+/* ---------------- Grok workspace compatibility ---------------- */
 function botTokensOf(u){ return Math.max(0,Number(u?.botTokens||0)); }
-async function getBotSettings(){
-  const s=await getDoc(doc(db,'settings','bot'));
-  return s.exists()?s.data():{};
-}
-
-/* ---------------- NEXTBOT Agent Tools ---------------- */
-const NEXTBOT_TOOL_POLICY = {
-  readTeam:true, readChannels:true, searchMessages:true, readRecords:true,
-  postMessage:true, pinMessage:true, createChannel:true, manageTasks:true
-};
-function nextbotToolCatalog(){
-  return `NEXTBOT 도구 권한:
-- team.list: 전체 팀원 기본 프로필/역할/접속상태 조회
-- channels.list: 채널/카테고리 목록 조회
-- messages.search: 전체 채팅에서 키워드 검색
-- records.read: 경기전략/미션/연습/기록/테스트 데이터 조회
-- messages.post: 지정 채널에 NEXTBOT 이름으로 메시지 게시
-- messages.pin: 지정 메시지 고정/해제 (관리자 권한 필요)
-- channels.create: 새 채널 생성 (관리자 권한 필요)
-- tasks.manage: 현재 사용자의 할 일 추가/완료/삭제
-
-도구 사용 규칙:
-1) 질문에 답하기 위해 필요한 경우 도구를 적극적으로 사용하세요.
-2) 읽기 도구는 자유롭게 사용할 수 있습니다.
-3) 쓰기 도구는 사용자가 명시적으로 요청한 경우에만 사용하세요.
-4) 관리자 전용 도구는 실제 관리자일 때만 실행됩니다.
-5) 실행 결과를 사실처럼 꾸며내지 말고 실제 결과를 바탕으로 답하세요.
-6) 도구가 필요 없으면 사용하지 마세요.
-
-도구 호출 형식(필요할 때 답변에 포함):
-[[NEXTBOT_TOOL]]{"name":"team.list","args":{}}
-[[NEXTBOT_TOOL]]{"name":"messages.search","args":{"query":"검색어","limit":20}}
-[[NEXTBOT_TOOL]]{"name":"messages.post","args":{"channel":"chan-teamchat","content":"게시할 내용"}}
-[[NEXTBOT_TOOL]]{"name":"messages.pin","args":{"channel":"chan-teamchat","messageId":"문서ID","pinned":true}}
-[[NEXTBOT_TOOL]]{"name":"channels.create","args":{"categoryId":"cat-team","name":"새채널"}}
-도구 호출 후에는 [[NEXTBOT_TOOL]] 줄을 최종 답변에서 제외하세요.`;
-}
-async function nextbotAgentTool(name,args={},actorUid){
-  const actor=usersMap[actorUid]||myDoc||{};
-  if(name==='team.list'){
-    return Object.values(usersMap).filter(u=>u && u.uid!=='BOT').map(u=>({uid:u.uid,nickname:u.nickname||'',roles:u.roles||[],online:!!u.online,status:u.status||''}));
-  }
-  if(name==='channels.list'){
-    return channels.map(c=>({id:c.id,name:c.name,categoryId:c.categoryId||'',category:c.categoryName||'',feature:!!FEATURE_CHANNELS[c.id]}));
-  }
-  if(name==='messages.search'){
-    const q=String(args.query||'').trim().toLowerCase(); if(!q)return [];
-    const limit=Math.min(50,Math.max(1,Number(args.limit)||20)); const out=[];
-    for(const ch of channels){
-      try{const qs=await getDocs(query(collection(db,'channels',ch.id,'messages'),orderBy('createdAt','desc'),limit(200)));qs.forEach(d=>{const m=d.data();if(String(m.content||'').toLowerCase().includes(q)&&out.length<limit)out.push({id:d.id,channelId:ch.id,channel:ch.name,user:usersMap[m.userId]?.nickname||m.botActorNickname||'사용자',content:m.content||''});});}catch(e){console.warn('agent search',e);}
-      if(out.length>=limit)break;
-    } return out;
-  }
-  if(name==='records.read'){
-    const store=String(args.store||''); if(!['strategies','missions','practices','records','tests'].includes(store))throw new Error('허용되지 않은 기록 저장소입니다.');
-    const qs=await getDocs(query(collection(db,store),limit(100))); return qs.docs.map(d=>({id:d.id,...d.data()}));
-  }
-  if(name==='messages.post'){
-    const channelId=String(args.channel||'').trim(), content=String(args.content||'').trim();
-    if(!channelId||!content)throw new Error('게시할 채널과 내용이 필요합니다.');
-    if(!channels.some(c=>c.id===channelId))throw new Error('존재하지 않는 채널입니다.');
-    await sendBotMessage(channelId,content,actorUid,`<div class="bot-answer-meta"><span>NEXTBOT Agent</span><span>게시 완료</span></div>`,{botToolAction:'messages.post'}); return {ok:true,channelId};
-  }
-  if(name==='messages.pin'){
-    if(!canUseAdminCommands())throw new Error('메시지 고정은 관리자 권한이 필요합니다.');
-    const channelId=String(args.channel||''), messageId=String(args.messageId||''); if(!channelId||!messageId)throw new Error('채널과 메시지 ID가 필요합니다.');
-    await updateDoc(doc(db,'channels',channelId,'messages',messageId),{pinned:args.pinned!==false}); await auditAdmin('bot-pin-message',`${channelId}/${messageId}`); return {ok:true};
-  }
-  if(name==='channels.create'){
-    if(!canUseAdminCommands())throw new Error('채널 생성은 관리자 권한이 필요합니다.');
-    const cat=String(args.categoryId||''), nameText=String(args.name||'').trim(); if(!cat||!nameText)throw new Error('카테고리와 채널명이 필요합니다.');
-    const ref=await addDoc(collection(db,'channels'),{name:nameText,categoryId:cat,createdAt:serverTimestamp(),createdBy:actorUid,team:activeTeam}); await auditAdmin('bot-create-channel',ref.id,nameText); return {ok:true,id:ref.id,name:nameText};
-  }
-  throw new Error('알 수 없는 NEXTBOT 도구입니다.');
-}
-async function runNextbotToolCalls(text,actorUid){
-  const re=/\[\[NEXTBOT_TOOL\]\]\s*(\{[\s\S]*?\})/g; let m,results=[],clean=text;
-  while((m=re.exec(text))){
-    try{const call=JSON.parse(m[1]);const result=await nextbotAgentTool(call.name,call.args||{},actorUid);results.push({call,result});}
-    catch(e){results.push({call:{name:'unknown'},error:e.message||String(e)});}
-    clean=clean.replace(m[0],'');
-  }
-  return {text:clean.replace(/\n{3,}/g,'\n\n').trim(),results};
-}
-
-async function collectAllChatForBot(){
-  const rows=[];
-  for(const ch of channels){
-    try{
-      const qs=await getDocs(query(collection(db,'channels',ch.id,'messages'),orderBy('createdAt','asc'),limit(5000)));
-      qs.forEach(d=>{
-        const m=d.data();
-        if(m.type==='poll') rows.push(`[${ch.name}] ${usersMap[m.userId]?.nickname||m.botActorNickname||'사용자'}: 투표 - ${m.question||''} / ${(m.options||[]).map(o=>o.text).join(', ')}`);
-        else if(m.content) rows.push(`[${ch.name}] ${usersMap[m.userId]?.nickname||m.botActorNickname||'사용자'}: ${m.content}`);
-      });
-    }catch(e){ console.warn('bot history read failed',ch.id,e); }
-  }
-  // Gemini 컨텍스트가 무한히 커지지 않도록 가장 오래된 부분부터 압축해 상한을 둡니다.
-  const MAX=140000;
-  let text=rows.join('\n');
-  if(text.length>MAX) text='[오래된 기록 일부는 컨텍스트 한도로 생략됨]\n'+text.slice(-MAX);
-  return text;
-}
-async function bumpBotStat(field,n=1){
-  try{ await updateDoc(doc(db,'settings','botStats'),{[field]:increment(n),updatedAt:serverTimestamp()}); }
-  catch(e){ await setDoc(doc(db,'settings','botStats'),{[field]:n,updatedAt:serverTimestamp()},{merge:true}); }
-}
-let botTaskSeq=0;
-const botTasks=new Map();
-const BOT_TASK_STORE='pendingBotTasks';
-// NEXTBOT 작업 상태는 브라우저 localStorage가 아니라 Firebase users/{uid} 문서에 저장합니다.
-// 새로고침/브라우저 재접속 후에도 질문과 작업 대상 채널을 복구할 수 있습니다.
-let botTaskPersistTimers=new Map();
-function botTaskSafe(task){
-  return {
-    id:Number(task.id)||0, channelId:String(task.channelId||''), channelName:String(task.channelName||'채팅방'),
-    question:String(task.question||''), model:String(task.model||BOT_DEFAULT_MODEL), phase:String(task.phase||'queued'),
-    partial:String(task.partial||'').slice(-12000), startedAt:Number(task.startedAt||Date.now()), updatedAt:Date.now(),
-    resumed:!!task.resumed
-  };
-}
-async function persistBotTask(task, immediate=false){
-  if(!currentUser||!task)return;
-  const uid=currentUser.uid, safe=botTaskSafe(task), key=String(safe.id);
-  const save=async()=>{
-    try{
-      await runTransaction(db,async tx=>{
-        const uref=doc(db,'users',uid), snap=await tx.get(uref), data=snap.exists()?snap.data():{};
-        const pending={...(data.pendingBotTasks||{})}; pending[key]=safe;
-        const entries=Object.entries(pending).sort((a,b)=>Number(a[1]?.updatedAt||0)-Number(b[1]?.updatedAt||0)).slice(-8);
-        tx.set(uref,{pendingBotTasks:Object.fromEntries(entries)},{merge:true});
-      });
-    }catch(e){ console.warn('Firebase bot task persistence failed',e); }
-  };
-  if(immediate){
-    const timer=botTaskPersistTimers.get(key); if(timer)clearTimeout(timer); botTaskPersistTimers.delete(key);
-    await save();
-  }else{
-    const old=botTaskPersistTimers.get(key); if(old)clearTimeout(old);
-    botTaskPersistTimers.set(key,setTimeout(()=>{botTaskPersistTimers.delete(key);save();},500));
-  }
-}
-async function clearPersistedBotTask(taskId){
-  if(!currentUser)return;
-  const uid=currentUser.uid,key=String(taskId);
-  const timer=botTaskPersistTimers.get(key); if(timer)clearTimeout(timer); botTaskPersistTimers.delete(key);
-  try{
-    await runTransaction(db,async tx=>{
-      const uref=doc(db,'users',uid),snap=await tx.get(uref),data=snap.exists()?snap.data():{},pending={...(data.pendingBotTasks||{})};
-      delete pending[key]; tx.set(uref,{pendingBotTasks:pending},{merge:true});
-    });
-  }catch(e){ console.warn('Firebase bot task cleanup failed',e); }
-}
-async function getPersistedBotTasks(){
-  if(!currentUser)return [];
-  try{
-    const snap=await getDoc(doc(db,'users',currentUser.uid));
-    const pending=snap.exists()?(snap.data().pendingBotTasks||{}):{};
-    return Object.values(pending).filter(t=>t&&t.question&&t.channelId).sort((a,b)=>Number(a.startedAt||0)-Number(b.startedAt||0));
-  }catch(e){ console.warn('Firebase bot task read failed',e); return []; }
-}
-function markPersistedBotTaskDone(task){
-  void clearPersistedBotTask(task?.id);
-}
-function renderBotTaskIndicator(){
-  let el=document.getElementById('botTaskIndicator');
-  if(!el){
-    el=document.createElement('div');
-    el.id='botTaskIndicator';
-    el.style.cssText='position:fixed;right:18px;bottom:92px;z-index:9990;display:none;max-width:min(360px,calc(100vw - 36px));background:rgba(17,18,20,.96);border:1px solid var(--border);border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.35);backdrop-filter:blur(14px);padding:10px 12px;color:var(--text);font-size:13px;';
-    document.body.appendChild(el);
-  }
-  const tasks=[...botTasks.values()].filter(t=>!t.done);
-  if(!tasks.length){el.style.display='none';return;}
-  el.style.display='block';
-  el.innerHTML=`<div style="font-weight:800;margin-bottom:7px;">🤖 NEXTBOT 백그라운드 작업 ${tasks.length}개</div>`+
-    tasks.map(t=>`<button data-bottask="${t.id}" style="display:block;width:100%;text-align:left;background:transparent;border:0;border-top:1px solid var(--border);padding:7px 2px;color:var(--text);cursor:pointer;">⏳ <b>#${escapeHtml(t.channelName||'채팅방')}</b> · 답변 생성 중...</button>`).join('');
-  el.querySelectorAll('[data-bottask]').forEach(btn=>btn.onclick=()=>{
-    const t=botTasks.get(Number(btn.getAttribute('data-bottask')));
-    if(t && t.channelId && !FEATURE_CHANNELS[t.channelId]) openChannel(t.channelId,t.channelName,'');
-  });
-}
-function removeBotStreamingBubble(taskId){
-  const el=document.getElementById('botStreamingBubble');
-  if(el && (!taskId || el.dataset.taskId===String(taskId))) el.remove();
-}
-function updateBotStreamingBubble(text,status='생성 중...',withCodePreviews=false,taskId=null,channelId=null){
-  const list=$('msgList'); if(!list)return;
-  // 스트리밍 중인 봇 답변은 '생성 당시의 채널'에서만 표시합니다.
-  // 다른 채널로 이동하면 백그라운드 생성은 계속되며, 현재 화면에는 따라오지 않습니다.
-  if(channelId && currentChannelId!==channelId)return;
-  let box=document.getElementById('botStreamingBubble');
-  if(box && taskId && box.dataset.taskId!==String(taskId)) box=null;
-  if(!box){
-    box=document.createElement('div');box.id='botStreamingBubble';box.className='bot-streaming-bubble';
-    if(taskId)box.dataset.taskId=String(taskId);
-    box.innerHTML=`<div class="bot-streaming-head"><span>🤖 NEXTBOT</span><span class="bot-streaming-status" data-bot-status>${escapeHtml(status)}</span></div><div class="bot-streaming-content markdown-body" data-bot-stream-content></div>`;
-    list.appendChild(box);
-  }
-  box.querySelector('[data-bot-status]').textContent=status;
-  const content=box.querySelector('[data-bot-stream-content]');
-  content.innerHTML=text?renderMentions(text,withCodePreviews):'<span class="bot-streaming-status">생성 중...</span>';
-  if(text){const cursor=document.createElement('span');cursor.className='bot-streaming-cursor';content.appendChild(cursor);}
-  list.scrollTop=list.scrollHeight;
-}
-async function recoverPendingBotTasks(){
-  if(!currentUser||!myDoc) return;
-  const pending=await getPersistedBotTasks();
-  if(!pending.length) return;
-  // 새로고침으로 JS 실행이 끊긴 작업은 답변 전체를 다시 생성해도 최종 메시지 문서 ID가 같아서 중복 저장되지 않습니다.
-  for(const saved of pending.slice(0,4)){
-    if(!saved?.question||!saved?.channelId) { void clearPersistedBotTask(saved?.id); continue; }
-    if(botTasks.has(saved.id)) continue;
-    toast(`🤖 중단된 NEXTBOT 작업을 복구합니다 · #${saved.channelName||'채팅방'}`);
-    // 복구 작업은 기존 함수와 같은 토큰 예약 로직을 거치지 않도록 전용 프롬프트로 1회 재실행합니다.
-    const task={...saved,id:Number(saved.id)||(++botTaskSeq),resumed:true,done:false};
-    botTasks.set(task.id,task); renderBotTaskIndicator();
-    try{
-      const settings=await getBotSettings(),apiKey=String(settings.apiKey||'').trim();
-      let model=String(settings.model||BOT_DEFAULT_MODEL).trim();
-      if(BOT_LEGACY_MODEL_FALLBACKS[model])model=BOT_LEGACY_MODEL_FALLBACKS[model];
-      if(!BOT_MODEL_OPTIONS.includes(model)||!apiKey) throw new Error('NEXTBOT 복구 설정을 확인해주세요.');
-      const history=await collectAllChatForBot();
-      const defaultBotPrompt='당신은 이 팀 채팅 서비스의 AI 봇 NEXTBOT입니다. 사용자의 요청에 직접 답하세요. 과거 채팅 기록은 필요한 경우 참고 자료로 사용하세요. 기록에 없는 사실도 사용자가 새로운 창작, 코딩, 게임, HTML, Python 등의 생성을 요청한다면 직접 새로 만들어 제공할 수 있습니다. 기록에 없는 과거 사실을 사실인 것처럼 지어내지는 마세요. 답변은 한국어로, 필요한 경우 Markdown을 사용하세요. 코드나 긴 문서는 절대 생략하지 말고 완성본 전체를 제공하세요.';
-      const baseBotPrompt=String(settings.defaultPrompt||defaultBotPrompt).trim()||defaultBotPrompt;
-      const prompt=`${baseBotPrompt}\n\n${nextbotToolCatalog()}\n\n현재 질문자: ${myDoc?.nickname||'사용자'}\n\n=== 전체 채팅 기록 ===\n${history}\n\n=== 중단된 작업의 질문 ===\n${saved.question}\n\n=== 복구 지침 ===\n이 작업은 브라우저 새로고침으로 중단되었습니다. 질문에 대한 완전한 최종 답변만 다시 작성하세요. 중간 진행 상태나 복구 사실은 답변에 설명하지 마세요.`;
-      const result=await streamGeminiAnswer(apiKey,model,prompt,partial=>{task.partial=String(partial||'').slice(-12000);persistBotTask(task);});
-      let answer=String(result.text||'').trim();
-      if(!answer) throw new Error('복구된 NEXTBOT 답변이 비어 있습니다.');
-      const toolRun=await runNextbotToolCalls(answer,currentUser.uid); answer=toolRun.text;
-      task.phase='saving'; persistBotTask(task);
-      await sendBotMessage(saved.channelId,answer,undefined,`<div class="bot-answer-meta"><span>새로고침 후 작업 복구</span></div>`,{botQuestion:saved.question,botModel:model,botRecovered:true,botTaskId:task.id});
-      task.done=true; markPersistedBotTaskDone(task); notifyBotCompletion(task,answer);
-    }catch(e){ console.error('bot task recovery failed',e); void clearPersistedBotTask(task.id); toast('중단된 NEXTBOT 작업 복구 실패: '+(e.message||e)); }
-    finally{ botTasks.delete(task.id); renderBotTaskIndicator(); }
-  }
-}
-function notifyBotCompletion(task,answer){
-  const channelName=task?.channelName||'채팅방';
-  const body=`#${channelName}에서 NEXTBOT 답변 생성이 완료되었습니다.`;
-  toast(`🤖 NEXTBOT 답변 완료 · #${channelName}`);
-  try{
-    if('Notification' in window && Notification.permission==='granted'){
-      const n=new Notification('NEXTBOT 답변 완료',{body,tag:`nextbot-${task?.id||Date.now()}`});
-      n.onclick=()=>{try{window.focus();}catch(_){} if(task?.channelId && !FEATURE_CHANNELS[task.channelId])openChannel(task.channelId,task.channelName,'');};
-    }
-  }catch(_e){}
-}
-async function streamGeminiAnswer(){throw new Error('AI 서버 함수가 아직 연결되지 않았습니다.');}
-async function handleBotChatCommand(){toast('AI 답변은 서버 함수와 Gemini 키를 설정한 뒤 사용할 수 있습니다. 일반 채팅과 기본 명령은 사용할 수 있습니다.');}
+async function handleBotChatCommand(prompt='',mode='chat'){hyper.open('ai',{prompt,mode,channelId:currentChannelId&&!FEATURE_CHANNELS[currentChannelId]?currentChannelId:''});}
 function getMonday(d){
   const date=new Date(d);
   const day=date.getDay(); // 0=일 ... 6=토
@@ -2719,7 +2460,7 @@ function openShortcutModal(){
   <div class="day-evt-row"><b>Enter</b><span style="margin-left:auto">메시지 전송</span></div>
   <div class="day-evt-row"><b>Shift + Enter</b><span style="margin-left:auto">줄바꿈</span></div>
   <div class="day-evt-row"><b>Alt + T</b><span style="margin-left:auto">관리자 봇 모드</span></div>
-  <div class="day-evt-row"><b>Ctrl/Cmd + K</b><span style="margin-left:auto">현재 채널 메시지 검색</span></div>
+  <div class="day-evt-row"><b>Ctrl/Cmd + K</b><span style="margin-left:auto">통합 검색</span></div>
   <div class="day-evt-row"><b>Esc</b><span style="margin-left:auto">모달/검색 닫기</span></div>
   <div class="day-evt-row"><b>End</b><span style="margin-left:auto">채팅 맨 아래로</span></div>`,false);
 }
@@ -2761,10 +2502,10 @@ function openToolsModal(){
 async function handleMegaCommand(cmd,args){
   switch(cmd){
     case '/봇도움말': { openCommandHelpModal(); return true; }
-    case '/내토큰': { const u=(await getDoc(doc(db,'users',currentUser.uid))).data()||myDoc||{}; await postBotReply(`🤖 ${myDoc.nickname}님의 AI 봇 토큰: **${botTokensOf(u)}개**\n• /봇채팅 질문 1회 = 1토큰\n• /회의요약도 1회당 1토큰을 사용합니다.`); return true; }
+    case '/내토큰': { const u=(await getDoc(doc(db,'users',currentUser.uid))).data()||myDoc||{}; await postBotReply(`🤖 ${myDoc.nickname}님의 AI 봇 토큰: **${botTokensOf(u)}개**\n• 기존 잔액은 보존됩니다.\n• Grok은 서버의 하루 사용 횟수 제한을 적용하며 이 잔액을 차감하지 않습니다.`); return true; }
     case '/내상태': { const u=(await getDoc(doc(db,'users',currentUser.uid))).data()||myDoc||{}; const p=presenceData[currentUser.uid]; await postBotReply(`👤 **${u.nickname||myDoc.nickname}**\n상태: ${isUserTimedOut(u)?`⏳ 타임아웃 (${timeoutRemainingText(u)})`:'✅ 이용 가능'}\n접속: ${p?.state==='online'?'🟢 온라인':'⚫ 오프라인'}\nAI 봇 토큰: 🤖 ${botTokensOf(u)}개`); return true; }
     case '/핑': { const t=performance.now(); const ping=Math.max(0,Math.round(performance.now()-t)); await postBotReply(`🏓 **PONG!**\n봇 처리: ${ping}ms\n현재 상태: ${isUserTimedOut()?'⏳ 타임아웃':'🟢 정상 이용 가능'}`); return true; }
-    case '/회의요약': { if(!args) args='지금까지의 회의 내용을 핵심 결정사항, 할 일, 담당자, 일정 중심으로 요약해줘.'; await handleBotChatCommand(args); return true; }
+    case '/회의요약': { if(!args) args='지금까지의 회의 내용을 핵심 결정사항, 할 일, 담당자, 일정 중심으로 요약해줘.'; await handleBotChatCommand(args,'meeting'); return true; }
     case '/내점수': {
       const r=await computeRanking(weekIdOf(new Date())); const me=r.find(x=>x.uid===currentUser.uid);
       await postBotReply(me?`⭐ ${myDoc.nickname}님의 이번 주 점수: ${me.score}점\n메시지 ${me.msgCount}개 + 받은 리액션 ${me.reactCount}개 × ${MVP_REACT_WEIGHT}`:'⭐ 이번 주 MVP 집계 점수가 아직 없어요.'); return true;
@@ -2898,7 +2639,7 @@ async function handleMegaCommand(cmd,args){
 
 
 /* ============================================================
-   NEXTBOT ULTRA PACK
+   NEXTBOT HYPER PACK
    - 기존 Firestore 컬렉션(stats/users) 조회 + 개인 localStorage 중심
    - 새로운 서버 컬렉션을 만들지 않아 추가 Rules 없이 동작
    ============================================================ */
@@ -3332,21 +3073,21 @@ function extractMentions(text){
   });
   return Array.from(found);
 }
-async function pushMentionNotifications(mentions, text){
+async function pushMentionNotifications(mentions,text,context={channelId:currentChannelId,channelName:currentChannelName,uid:currentUser?.uid,nickname:myDoc?.nickname,users:usersMap}){
   if(!mentions || !mentions.length) return;
   const targets=new Set();
   mentions.forEach(m=>{
-    if(m==='전체'){ Object.keys(usersMap).forEach(uid=>targets.add(uid)); }
+    if(m==='전체'){ Object.keys(context.users).forEach(uid=>targets.add(uid)); }
     else if(MENTION_ROLE_TOKENS[m] && MENTION_ROLE_TOKENS[m]!=='__all__'){
-      Object.values(usersMap).forEach(u=>{ if((u.roles||[]).includes(MENTION_ROLE_TOKENS[m])) targets.add(u.uid); });
+      Object.values(context.users).forEach(u=>{ if((u.roles||[]).includes(MENTION_ROLE_TOKENS[m])) targets.add(u.uid); });
     } else if(m.startsWith('user:')){ targets.add(m.slice(5)); }
   });
-  targets.delete(currentUser.uid);
+  targets.delete(context.uid);
   for(const uid of targets){
     const nref = push(ref(rtdb,'notifications/'+uid));
     await set(nref, {
-      channelId: currentChannelId, channelName: currentChannelName,
-      fromNickname: myDoc.nickname, text: text.slice(0,120), createdAt: Date.now(), read:false
+      channelId: context.channelId, channelName: context.channelName,
+      fromNickname: context.nickname, text: text.slice(0,120), createdAt: Date.now(), read:false
     });
   }
 }
@@ -3432,7 +3173,7 @@ function handleTyping(){
   typingTimeoutHandle=setTimeout(()=>setTypingState(false), 2500);
 }
 function setTypingState(isTyping){
-  if(!currentChannelId) return;
+  if(!currentChannelId||!currentUser||!myDoc)return;
   set(ref(rtdb,'typing/'+currentChannelId+'/'+currentUser.uid), isTyping ? { typing:true, nickname:myDoc.nickname } : { typing:false, nickname:myDoc.nickname });
 }
 
@@ -4158,7 +3899,7 @@ function a50EditMvpUser(uid,stats){
 }
 
 /* ----- AI bot admin ----- */
-async function renderAdminBot(){ $('adminBody').innerHTML='<div class="admin50-card"><h4>AI 서버 설정 필요</h4><p>Supabase 이전 후 Gemini 비밀 키를 브라우저에 저장하는 기능을 제거했습니다. AI 답변은 인증과 사용량 검사를 수행하는 서버 함수를 연결한 뒤 사용할 수 있습니다.</p><p class="admin50-muted">일반 채팅, 기본 명령, 투표와 팀 기록은 사용할 수 있습니다. 기존 봇 토큰 잔액은 보존했습니다.</p></div>'; }
+async function renderAdminBot(){ $('adminBody').innerHTML='<div class="admin50-card"><h4>Grok AI · 서버 연결</h4><p>Grok은 Supabase Edge Function에서 실행됩니다. API 키를 브라우저에 입력하지 마세요.</p><p style="margin:12px 0"><a href="./grok-setup.html" target="_blank" rel="noopener">Grok 설치 가이드 열기 ↗</a></p><p class="admin50-muted">서버 기본 한도: 1인 하루 20회, 전체 하루 100회. 기존 봇 토큰은 보존되며 Grok 한도와 별개입니다.</p><button class="btn" id="adminOpenGrok">Grok 작업창 열기</button></div>'; $('adminOpenGrok').onclick=()=>{closeModal();hyper.open('ai');}; }
 async function renderAdminSystem(){
   const body=$('adminBody');
   const appSnap=await getDoc(doc(db,'settings','app'));
@@ -4236,7 +3977,7 @@ function applyCurrentChannelAdminState(){
   const composer=document.querySelector('.composer-wrap');
   if(composer)composer.style.opacity=locked?'.55':'';
   if(msgInput){msgInput.disabled=locked;msgInput.placeholder=locked?'🔒 관리자가 이 채널의 쓰기를 잠갔습니다.':(botModeOn?'🤖 봇으로 메시지 보내는 중... (Alt+T로 끄기)':'메시지 보내기... (@ 로 멘션)');}
-  if($('sendBtn'))$('sendBtn').disabled=locked || (!msgInput.value.trim()&&!pendingAttachments.length);
+  if($('sendBtn'))$('sendBtn').disabled=messageSending||locked || (!msgInput.value.trim()&&!pendingAttachments.length);
   let note=$('adminChannelLockNote');
   if(locked&&!note){note=document.createElement('div');note.id='adminChannelLockNote';note.className='admin50-locknote';note.textContent='🔒 이 채널은 관리자가 쓰기 잠금했습니다.';$('chatView')?.insertBefore(note,$('msgList'));}
   if(!locked&&note)note.remove();
@@ -4329,6 +4070,38 @@ function checkEventDdayNotifications(){
  for(const event of eventsAll.filter(e=>e.date===today)){const key=today+':'+event.id;if(seen[key])continue;toast('📅 오늘 일정: '+String(event.title||'일정'));seen[key]=true;}
  const recent=Object.fromEntries(Object.entries(seen).filter(([key])=>key.startsWith(today+':')));storeSet('calendarNotified',recent);
 }
+
+/* HYPER workspace adapter: keeps all database reads under existing RLS. */
+const hyper=initHyper({
+ context:()=>({user:currentUser,channelId:currentChannelId,channels:channels.filter(canSeeChannel).map(c=>({...c,feature:!!FEATURE_CHANNELS[c.id]}))}),
+ ask:askGrok,toast,copy:copyTextSafe,refreshDashboard:()=>refreshUltraDashboard(),
+ messages:async(channelId,count)=>{
+  const ch=channels.find(c=>c.id===channelId);if(!ch||!canSeeChannel(ch))throw new Error('읽을 수 없는 채널입니다.');
+  const snap=await getDocs(query(collection(db,'channels',channelId,'messages'),orderBy('createdAt','desc'),limit(count)));
+  return snap.docs.map(d=>{const m=d.data();return {id:d.id,...m,nickname:m.isBot?'NEXTBOT':usersMap[m.userId]?.nickname||'팀원',time:fmtTime(m.createdAt)};});
+ },
+ goChannel:(id,messageId)=>{
+  const ch=channels.find(c=>c.id===id);if(!ch||!canSeeChannel(ch)){toast('채널에 접근할 수 없습니다.');return;}
+  openChannel(id,ch.name,categories.find(c=>c.id===ch.categoryId)?.name||'');closeDrawer();
+  if(messageId){
+   openChatChannel(id,500);
+   let timer;const observer=new MutationObserver(findMessage);
+   function findMessage(){
+    if(currentChannelId!==id){observer.disconnect();clearTimeout(timer);return;}
+    const row=[...document.querySelectorAll('#msgList .msg-row')].find(x=>x.dataset.id===messageId);
+    if(row){observer.disconnect();clearTimeout(timer);row.scrollIntoView({block:'center',behavior:'smooth'});row.style.background='var(--blue-glow)';setTimeout(()=>row.style.background='',1800);}
+   }
+   observer.observe($('msgList'),{childList:true});
+   timer=setTimeout(()=>{observer.disconnect();if(currentChannelId===id)toast('메시지를 표시하지 못했습니다. 삭제 여부나 연결 상태를 확인해주세요.');},8000);findMessage();
+  }
+ },
+ insertDraft:text=>{
+  if(!currentChannelId||FEATURE_CHANNELS[currentChannelId]){toast('먼저 일반 채팅 채널을 열고 다시 가져와주세요. 답변은 작업창에 남아 있습니다.');return false;}
+  const existing=msgInput.value.trim();msgInput.value=(existing?existing+'\n\n':'')+text;
+  msgInput.dispatchEvent(new Event('input',{bubbles:true}));saveChannelDraft();$('sendBtn').disabled=false;toast('채팅 초안에 넣었습니다. 내용을 확인한 뒤 전송하세요.');return true;
+ }
+});
+
 </script>
 </body>
 </html>
