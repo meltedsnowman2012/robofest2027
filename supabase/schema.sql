@@ -397,7 +397,7 @@ grant execute on function public.nb_can_read(text,jsonb),public.nb_identity(),pu
 do $import$
 declare r record; d jsonb; team text;
 begin
- if to_regclass('nextbot_migration.backup_documents') is null then raise exception '02 SQL을 먼저 실행해주세요.'; end if;
+ if to_regclass('nextbot_migration.backup_documents') is null then raise exception '현재 프로젝트에 보관 백업이 없습니다. 제공받은 비공개 통합 설정 SQL을 먼저 실행해주세요.'; end if;
  for r in select path,source_data from nextbot_migration.backup_documents
    where backup_id='nextbot-admin-2026-10-26T07:00:05.545Z' loop
    d:=r.source_data;
