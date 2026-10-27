@@ -1,0 +1,2 @@
+[functions.nextbot-grok]
+verify_jwt = false

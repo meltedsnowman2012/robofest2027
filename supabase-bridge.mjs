@@ -209,3 +209,23 @@ export function onValue(reference,onData,onError=report){
 function trackRt(path,fn){if(!rtHandlers.has(path))rtHandlers.set(path,new Set());rtHandlers.get(path).add(fn);}
 export function off(reference){for(const fn of rtHandlers.get(reference.path)||[])fn();rtHandlers.delete(reference.path);}
 export function projectInfo(){return {url:config.url,projectId:config.projectId};}
+
+/** Authenticated server-side Grok gateway. API keys never enter this module. */
+export async function askGrok(body,{signal}={}){
+ const {data,error}=await sb.auth.getSession();fail(error);
+ if(!data?.session?.access_token)throw new Error('로그인한 뒤 다시 시도해주세요.');
+ const controller=new AbortController(),abort=()=>controller.abort();
+ if(signal?.aborted)controller.abort();else signal?.addEventListener('abort',abort,{once:true});
+ const timer=setTimeout(abort,85000);
+ try{
+  const response=await fetch(config.url+'/functions/v1/nextbot-grok',{method:'POST',signal:controller.signal,
+   headers:{'Content-Type':'application/json',apikey:config.publishableKey,Authorization:'Bearer '+data.session.access_token},
+   body:JSON.stringify(body)});
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok){
+   if(response.status===404)throw new Error('Grok 서버 설치 대기 · 관리자에게 GROK_SETUP.md의 설정을 요청해주세요.');
+   throw new Error(result.error||result.message||'Grok 연결에 실패했습니다. 잠시 뒤 다시 시도해주세요.');
+  }
+  return result;
+ }finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);}
+}
