@@ -72,10 +72,18 @@ Gemini 비밀 키를 브라우저에 저장하고 직접 호출하던 코드는 
 
 ## 검증과 한계
 
-- 로컬 PostgreSQL 호환 환경(PGlite)에서 스키마 실행/재실행, 데이터 이전, 권한·메시지·투표·리액션 검사 49개 통과.
+- 로컬 PostgreSQL 호환 환경(PGlite)에서 스키마 실행/재실행, 데이터 이전, 권한·메시지·투표·리액션 검사 51개 통과.
 - 실제 사용자 계정과 분리된 브라우저에서 목업 SDK를 사용하여 로그인, 채널, 메시지 전송, 관리자, 상태 점검, 캘린더, 디데이, 데스크톱/휴대폰 화면 검사 통과.
 - 실제 Supabase 프로젝트에서 SQL 실행, 실제 인증 메일, 실제 다중 사용자 Realtime 통신은 아직 확인하지 않았습니다.
 - 전체 백업은 읽는 동안 변경되는 데이터를 포함할 수 있어 시점 일관성이 보장되는 DB 스냅샷은 아닙니다.
 - 네트워크/CDN이 필요합니다. 확인되지 않은 상태에서 RLS를 끄거나 secret/service_role 키를 브라우저에 넣지 마세요.
 
 참고: [Supabase Auth](https://supabase.com/docs/guides/auth/passwords), [메일 설정](https://supabase.com/docs/guides/auth/auth-smtp), [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security).
+
+## SQL Editor 경고 안내
+
+`nextbot_private.identities`는 클라이언트의 스키마/테이블 접근 권한을 차단하고 RLS를 활성화합니다. 이 내부 테이블에는 클라이언트용 허용 정책을 만들지 않습니다. 검증된 계정을 연결하는 서버 함수만 소유자 권한으로 접근합니다.
+
+스키마 설치는 테이블/함수/정책을 생성·갱신하므로 일반적인 DB 변경 경고가 나올 수 있습니다. 앱의 메시지/채널 삭제 기능을 정의하는 함수 본문에 DELETE가 있지만, 설치 과정에서는 그 삭제 분기를 호출하지 않습니다. 기존 회원·채널을 삭제하거나 운영 데이터를 덮어쓰지 않습니다. 기존 읽기 정책은 DROP 없이 생성 또는 ALTER로 갱신합니다.
+
+기존에 SQL Editor에 붙여넣은 이전 버전 대신 최신 파일 전체를 복사해서 실행하세요. RLS 미설정 경고가 계속 나온다면 실행 전에 표시된 테이블명을 다시 확인하세요.
